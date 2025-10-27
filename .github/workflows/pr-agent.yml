@@ -19,7 +19,7 @@ jobs:
 
           # else use standard llm model
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_API_ENDPOINT: https://x666.me
+          OPENAI_API_ENDPOINT: https://api.kkyyxx.xyz/
           MODEL: gemini-2.5-pro
 
           # common
