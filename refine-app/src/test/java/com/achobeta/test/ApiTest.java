@@ -32,6 +32,12 @@ public class ApiTest {
     }
 
     @Test
+    public void teatPrAgent(){
+
+    }
+
+
+    @Test
     public void testA() {
 //        Set<ConstraintViolation<Dog>> violations = validator.validate(new Dog("zhangsan111"));
         Set<ConstraintViolation<Dog>> violations = validator.validate(new Dog("111"));
