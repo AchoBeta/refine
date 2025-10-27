@@ -33,6 +33,7 @@ public class ApiTest {
 
     @Test
     public void teatPrAgent(){
+       System.out.println("teatPrAgent");
     }
 
 
