@@ -32,8 +32,8 @@ spring:
       - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.redisson.spring.starter.RedissonAutoConfigurationV2
   datasource:
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:123456}
+    username: root
+    password: 123456
     url: jdbc:mysql://127.0.0.1:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:

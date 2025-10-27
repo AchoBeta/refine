@@ -28,8 +28,8 @@ thread:
 # 数据库配置；启动时配置数据库资源信息
 spring:
   datasource:
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:123456}
+    username: root
+    password: 123456
     url: jdbc:mysql://mysql:3306/achobeta-polaris?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
