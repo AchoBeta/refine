@@ -62,6 +62,3 @@
   - 默认目录：`./data/log`（相对应用工作目录）
   - 文件：`log_console.log`、`log_info.log`、`log_error.log`（按天滚动）
 
----
-
-如需更多背景介绍与团队贡献约定，详见 `docs/README.md`。

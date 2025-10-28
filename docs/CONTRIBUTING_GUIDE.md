@@ -4,6 +4,13 @@ AchoBeta Refine 琢玉系统-2025年-J组-复试项目-贡献指南
 
 > 快速了解项目结构 请阅读: `docs/PROJECT_GUIDE.md`
 
+# 如何贡献
+1. Fork项目
+2. 创建分支 基于develop:git checkout -b feature-AmazingFeature develop
+3. 提交更改:git commit -m 'Add some AmazingFeature'
+4. 推送到分支:git push origin feature-AmazingFeature
+5. 开启pr
+
 # 开发之前
 
 1. 请在根目录执行下面的命令
