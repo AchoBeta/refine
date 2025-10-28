@@ -9,7 +9,7 @@ import com.achobeta.types.support.postprocessor.PostContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * @author chensongmin

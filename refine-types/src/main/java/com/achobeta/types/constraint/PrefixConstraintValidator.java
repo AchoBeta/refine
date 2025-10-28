@@ -1,14 +1,14 @@
 package com.achobeta.types.constraint;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author chensongmin
  * @description
  * 验证器必须实现ConstraintValidator接口，该接口是泛型接口
- * 第一个参数是该验证器要用于在那个注解，第二个参数是该注解应用在什么数据类型上
+ * 第一个参数是该验证器要用于在哪个注解，第二个参数是该注解应用在什么数据类型上
  * @date 2024/11/11
  */
 @Slf4j
