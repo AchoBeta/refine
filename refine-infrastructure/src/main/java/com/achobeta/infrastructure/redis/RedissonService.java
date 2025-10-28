@@ -4,7 +4,7 @@ import org.redisson.api.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
