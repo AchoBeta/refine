@@ -42,7 +42,7 @@ template: |
   Version tags:
   - `https://github.com/$OWNER/$REPOSITORY/releases/tag/v$RESOLVED_VERSION`
   
-  **📒 Documentation**: Achobeta-Polaris
+  **📒 Documentation**: Achobeta-Refine
   
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
   

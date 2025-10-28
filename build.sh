@@ -3,8 +3,8 @@
 # 使用说明，用来提示输入参数
 usage(){
   echo "-----------------------------------"
-  echo "::: Welcome to AchoBeta-Polaris :::"
-  echo "Usage: sh running.sh [base|services|stop|rm|rmi]"
+  echo "::: Welcome to AchoBeta-Refine :::"
+  echo "Usage: sh build.sh [base|services|stop|rm|rmi]"
   exit 1
 }
 
@@ -36,7 +36,7 @@ base(){
   $COMPOSE_COMMAND -f docker-compose-environment.yml up -d
 }
 
-CONTAINER_NAME=polaris
+CONTAINER_NAME=refine
 #IMAGE_NAME=ghcr.io/bantanger/achobeta/polaris-app:latest
 
 # 启动程序模块（必须）

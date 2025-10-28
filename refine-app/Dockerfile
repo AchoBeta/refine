@@ -1,5 +1,5 @@
 # 基础镜像
-FROM openjdk:8
+FROM openjdk:21
 
 # 作者
 MAINTAINER bantanger

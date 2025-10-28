@@ -1,0 +1,39 @@
+name: Deploy after Docker Push Success
+
+on:
+  workflow_run:
+    workflows: ["Push Docker Image"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to server and deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          # port: ${{ secrets.SSH_PORT }} # Optional; default 22 if not set
+          script_stop: true
+          script: |
+            set -euo pipefail
+            REPO_DIR="https://github.com/AchoBeta/refine"
+            if [ -z "$REPO_DIR" ]; then
+              echo "SERVER_REPO_DIR secret is required" >&2
+              exit 1
+            fi
+            cd "$REPO_DIR"
+            # Ensure safe directory for git if running as root
+            git config --global --add safe.directory "$REPO_DIR" || true
+            git remote -v
+            git pull --ff-only
+            chmod +x ./build.sh || true
+            bash ./build.sh
+# TODO
+
