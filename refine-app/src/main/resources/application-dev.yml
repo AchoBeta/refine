@@ -29,8 +29,9 @@ thread:
 spring:
   autoconfigure:
     exclude:
-      - org.redisson.spring.starter.RedissonAutoConfiguration
       - org.redisson.spring.starter.RedissonAutoConfigurationV2
+      # 如需使用 RabbitMQ 就开开这个
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     username: root
     password: 123456
@@ -50,6 +51,7 @@ spring:
 # Redis【如需使用请打开】
 redis:
   sdk:
+    # 开关
     enabled: false
     config:
       host: 127.0.0.1
