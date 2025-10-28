@@ -44,4 +44,4 @@ data/log
 
 /docs/dev-ops/.env
 
-.idea/
+.idea/*
