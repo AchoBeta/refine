@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * OCR 网关：调用百度智能云 OCR 并统一返回 JSON 字符串
+ * Auth : Malog
+ * @Desc : 百度OCR RPC
+ * @Time : 2025/10/31
  */
 @Component
 @ConfigurationProperties(prefix = "baidu.ocr")

@@ -7,6 +7,13 @@ package com.achobeta.domain.ocr.service;
  */
 public interface IOcrService {
 
+    /**
+     * 从用户上传的文件中提取第一道题目
+     *
+     * @param fileBytes 文件字节数组
+     * @param fileType  文件类型
+     * @return 第一道题目信息
+     */
     QuestionItem extractFirstQuestion(byte[] fileBytes, String fileType);
 
 }

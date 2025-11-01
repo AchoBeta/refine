@@ -21,6 +21,13 @@ public class DefaultOcrService implements IOcrService {
     private final IFilePreprocessPort filePreprocessPort;
     private final IOcrPort ocrPort;
 
+    /**
+     * 抽取第一个问题
+     *
+     * @param fileBytes 文件字节数组
+     * @param fileType  文件类型
+     * @return 第一个问题
+     */
     @Override
     public QuestionItem extractFirstQuestion(byte[] fileBytes, String fileType) {
         if (fileBytes == null || fileBytes.length == 0) {

@@ -22,6 +22,7 @@ import java.util.Map;
  */
 @Component
 @ConfigurationProperties(prefix = "aliyun.ocr")
+@Deprecated
 public class OcrRPC {
 
     // setters for @ConfigurationProperties

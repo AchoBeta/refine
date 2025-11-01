@@ -10,6 +10,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * @Auth : Malog
+ * @Desc : OCR 识别接口
+ * @Time : 2025/10/31 17:29
+ */
 @Slf4j
 @Validated
 @RestController()
