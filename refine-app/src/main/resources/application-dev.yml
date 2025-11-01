@@ -35,7 +35,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://192.168.248.129:13306/achobeta_refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -47,15 +47,22 @@ spring:
       max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
       connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
       connection-test-query: SELECT 1
+  mail: #邮件验证码配置
+    host: smtp.qq.com  # SMTP服务器地址（QQ邮箱固定）
+    port: 587          # 端口（587为加密端口）
+    username: liangchaowen6@qq.com
+    password: cdqawjhpqzhijgig
+    properties.mail.smtp.auth: true  # 启用身份验证
+    properties.mail.smtp.starttls.enable: true  # 启用TLS加密
 
 # Redis【如需使用请打开】
 redis:
   sdk:
     # 开关
-    enabled: false
+    enabled: true
     config:
-      host: 127.0.0.1
-      port: 6379
+      host: 192.168.248.129
+      port: 16379
       pool-size: 10
       min-idle-size: 5
       idle-timeout: 30000
@@ -75,3 +82,7 @@ logging:
   level:
     root: info
   config: classpath:logback-spring.xml
+
+email:
+  config:
+    verify-code-expire-minute: 5

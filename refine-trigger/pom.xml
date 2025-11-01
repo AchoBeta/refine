@@ -44,7 +44,7 @@
             <groupId>com.achobeta</groupId>
             <artifactId>refine-domain</artifactId>
         </dependency>
-        </dependencies>
+    </dependencies>
 
     <build>
         <finalName>refine-trigger</finalName>
