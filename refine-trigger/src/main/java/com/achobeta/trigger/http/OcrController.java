@@ -35,7 +35,7 @@ public class OcrController {
                 ft = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
             }
             // 调用OCR服务提取文件中的第一个题目
-            QuestionItem item = ocrService.extractFirstQuestion(file.getBytes(), ft);
+            QuestionItem item = ocrService.extractQuestionContent(file.getBytes(), ft);
             return Response.SYSTEM_SUCCESS(item);
         } catch (Exception e) {
             // 记录OCR提取失败的日志并返回错误响应

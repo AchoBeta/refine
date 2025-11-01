@@ -14,6 +14,6 @@ public interface IOcrService {
      * @param fileType  文件类型
      * @return 第一道题目信息
      */
-    QuestionItem extractFirstQuestion(byte[] fileBytes, String fileType);
+    QuestionItem extractQuestionContent(byte[] fileBytes, String fileType);
 
 }

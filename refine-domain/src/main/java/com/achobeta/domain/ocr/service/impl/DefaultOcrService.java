@@ -29,7 +29,7 @@ public class DefaultOcrService implements IOcrService {
      * @return 第一个问题
      */
     @Override
-    public QuestionItem extractFirstQuestion(byte[] fileBytes, String fileType) {
+    public QuestionItem extractQuestionContent(byte[] fileBytes, String fileType) {
         if (fileBytes == null || fileBytes.length == 0) {
             throw new IllegalArgumentException("fileBytes is empty");
         }
