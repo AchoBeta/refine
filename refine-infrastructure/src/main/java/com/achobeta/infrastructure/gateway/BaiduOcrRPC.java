@@ -58,28 +58,29 @@ public class BaiduOcrRPC {
             return toJson(skeletonJson("Baidu OCR call failed: API Key/Secret Key is empty", null, ""));
         }
         try {
-            // 确保有有效的访问令牌
+            // 获取百度OCR的访问令牌，用于后续API调用的身份验证
             String token = getAccessToken();
             if (isBlank(token)) {
                 return toJson(skeletonJson("Baidu OCR call failed: Failed to get access token", null, ""));
             }
 
-            // 准备请求参数
+            // 将图像字节数据编码为Base64字符串，并构造POST请求参数
             String imageBase64 = Base64.encodeBase64String(imageBytes);
-            String params = "image=" + URLEncoder.encode(imageBase64, "UTF-8");
+            String params = "image=" + URLEncoder.encode(imageBase64, StandardCharsets.UTF_8);
 
-            // 发送OCR请求
+            // 构造OCR请求URL并打开HTTP连接，设置请求方法和内容类型
             URL url = new URL(ocrUrl + "?access_token=" + token);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setDoOutput(true);
 
+            // 向服务器发送图像数据
             try (OutputStream os = connection.getOutputStream()) {
                 os.write(params.getBytes(StandardCharsets.UTF_8));
             }
 
-            // 读取响应
+            // 读取服务器返回的响应数据
             StringBuilder response = new StringBuilder();
             try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
@@ -89,15 +90,16 @@ public class BaiduOcrRPC {
             }
 
             String raw = response.toString();
-            
-            // 从百度OCR响应中提取文本
+
+            // 解析百度OCR响应，提取识别出的文本内容
             String extractedText = extractTextFromBaiduResponse(raw);
-            
+
             Map<String, Object> data = skeletonJson(extractedText, raw, "v1");
             return toJson(data);
         } catch (Exception e) {
             return toJson(skeletonJson("Baidu OCR call failed: " + e.getMessage(), null, ""));
         }
+
     }
 
     /**

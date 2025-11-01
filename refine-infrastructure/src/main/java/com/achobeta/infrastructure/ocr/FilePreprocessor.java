@@ -27,13 +27,16 @@ public class FilePreprocessor {
     // PDF 转第一张图片（使用 PDFBox）
     public byte[] convertPdfToFirstImage(byte[] pdfBytes) throws IOException {
         try (PDDocument document = Loader.loadPDF(pdfBytes)) {
+            // 创建PDF渲染器并渲染第一页为图片
             PDFRenderer renderer = new PDFRenderer(document);
             BufferedImage image = renderer.renderImage(0); // 第一页
+            // 将图片转换为字节数组输出流
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
         }
     }
+
 
     // DOCX 优先提取第一张内嵌图片；没有图片则提取全文文字（UTF-8）
     public static byte[] extractFirstImageOrText(byte[] docxBytes) throws IOException {

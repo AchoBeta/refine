@@ -40,10 +40,13 @@ public class DefaultOcrService implements IOcrService {
         String lowerType = fileType.toLowerCase();
         String recognizedText;
         try {
+            // 处理 PDF 文件：转换为第一张图片并进行 OCR 识别
             if (lowerType.endsWith(".pdf") || "pdf".equals(lowerType)) {
                 byte[] image = filePreprocessPort.convertPdfToFirstImage(fileBytes);
                 recognizedText = ocrPort.recognizeImage(image);
-            } else if (lowerType.endsWith(".docx") || "docx".equals(lowerType)) {
+            }
+            // 处理 DOCX 文件：尝试从中提取图像或文本内容
+            else if (lowerType.endsWith(".docx") || "docx".equals(lowerType)) {
                 try {
                     byte[] data = filePreprocessPort.extractFirstImageOrText(fileBytes);
                     // 判断是否可能是文本（尽力而为：若可被 UTF-8 解码且包含换行/字母，视作文本）
@@ -58,10 +61,14 @@ public class DefaultOcrService implements IOcrService {
                     // 非有效 DOCX 或解析失败，退化为图片 OCR 尝试
                     recognizedText = ocrPort.recognizeImage(fileBytes);
                 }
-            } else if (lowerType.endsWith(".png") || lowerType.endsWith(".jpg") || lowerType.endsWith(".jpeg")
+            }
+            // 处理常见图片格式：直接使用 OCR 进行识别
+            else if (lowerType.endsWith(".png") || lowerType.endsWith(".jpg") || lowerType.endsWith(".jpeg")
                     || "png".equals(lowerType) || "jpg".equals(lowerType) || "jpeg".equals(lowerType)) {
                 recognizedText = ocrPort.recognizeImage(fileBytes);
-            } else if (lowerType.endsWith(".txt") || "txt".equals(lowerType)) {
+            }
+            // 处理纯文本文件：直接按 UTF-8 编码读取文本内容
+            else if (lowerType.endsWith(".txt") || "txt".equals(lowerType)) {
                 recognizedText = new String(fileBytes, StandardCharsets.UTF_8);
             } else {
                 // 默认尝试当作图片识别
@@ -71,7 +78,8 @@ public class DefaultOcrService implements IOcrService {
             throw new RuntimeException("OCR 处理失败: " + e.getMessage(), e);
         }
 
-        // 简单的第一题抽取策略：先返回全文，后续再做结构化解析
+        // TODO 填充AI提取题干字段，AI生成答案和生成题目详细解析字段可暂时删除或滞后
+        // 构造返回对象，当前只填充 questionText 字段，其余字段暂设为 null
         QuestionItem item = new QuestionItem();
         item.setQuestionText(recognizedText);
         item.setOptions(null);
