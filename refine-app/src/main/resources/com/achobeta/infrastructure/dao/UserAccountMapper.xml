@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.achobeta.infrastructure.dao.UserAccountMapper">
+
+    <!-- 通用结果集映射-->
+    <resultMap id="BaseResultMap" type="com.achobeta.domain.user.model.entity.UserEntity">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_picture_resource" property="userPictureResource"/>
+        <result column="user_account" property="userAccount"/>
+        <result column="user_email" property="userEmail"/>
+        <result column="user_phone_num" property="userPhoneNum"/>
+        <result column="user_password" property="userPassword"/>
+        <result column="create_time" property="createTime"/>
+        <result column="user_status" property="userStatus"/>
+    </resultMap>
+
+    <select id="selectByAccount" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        user_id,
+        user_name,
+        user_picture_resource,
+        user_account,
+        user_email,
+        user_phone_num,
+        user_password,
+        create_time,
+        user_status
+        FROM UserInformation
+        WHERE
+        user_account = #{userAccount}
+    </select>
+
+
+    <!-- 2. 插入用户（insert 方法） -->
+    <insert id="insert" parameterType="com.achobeta.domain.user.model.entity.UserEntity">
+        INSERT INTO UserInformation (
+        user_id,
+        user_name,
+        user_picture_resource,
+        user_account,
+        user_email,
+        user_phone_num,
+        user_password,
+        create_time,
+        user_status
+        ) VALUES (
+        #{userId},
+        #{userName},
+        #{userPictureResource},
+        #{userAccount},
+        #{userEmail},
+        #{userPhoneNum},
+        #{userPassword},
+        #{createTime},
+        #{userStatus}
+        )
+    </insert>
+
+
+    <!-- 3. 更新用户（update 方法） -->
+    <update id="update" parameterType="com.achobeta.domain.user.model.entity.UserEntity">
+        UPDATE UserInformation
+        SET
+        <set>
+            <if test="query.userName != null and query.userName != ''">
+            user_name = #{userName},
+            </if>
+            <if test="query.userPictureResource != null">
+            user_picture_resource = #{userPictureResource},
+            </if>
+            <if test="query.userEmail != null">
+            user_email = #{userEmail},
+            </if>
+            <if test="query.userPhoneNum != null">
+            user_phone_num = #{userPhoneNum},
+            </if>
+            <if test="query.userPassword != null">
+            user_password = #{userPassword},
+            </if>
+            <if test="query.userStatus != null">
+            user_status = #{userStatus},
+            </if>
+        </set>
+        WHERE
+        user_id = #{userId}
+    </update>
+
+</mapper>

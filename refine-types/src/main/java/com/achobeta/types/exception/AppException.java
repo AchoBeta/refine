@@ -1,5 +1,6 @@
 package com.achobeta.types.exception;
 
+import com.achobeta.types.enums.GlobalServiceStatusCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,37 +10,57 @@ public class AppException extends RuntimeException {
 
     private static final long serialVersionUID = 5317680961212299217L;
 
-    /** 异常码 */
-    private String code;
+    /** 返回码(GlobalServiceStatusCode枚举类里的) */
+    GlobalServiceStatusCode statusCode;
 
-    /** 异常信息 */
-    private String info;
+    /** 异常码（子类自定义字段） */
+    private Integer code;
 
-    public AppException(String code) {
-        this.code = code;
+    /** 异常消息（子类自定义字段） */
+    private String message;
+
+
+    // 仅传异常消息
+    public AppException(String message) {
+        super(message);
+        this.code = null;
+        this.message = message; // 同时初始化子类自己的message
     }
 
-    public AppException(String code, Throwable cause) {
+    // 异常码 + 异常原因
+    public AppException(Integer code, Throwable cause) {
+        super(cause);
         this.code = code;
-        super.initCause(cause);
+        this.message = null;
     }
 
-    public AppException(String code, String message) {
+    // 异常码 + 异常消息
+    public AppException(Integer code, String message) {
+        super(message);
         this.code = code;
-        this.info = message;
+        this.message = message;
     }
 
-    public AppException(String code, String message, Throwable cause) {
+    // 异常码 + 异常消息 + 原因
+    public AppException(Integer code, String message, Throwable cause) {
+        super(message, cause);
         this.code = code;
-        this.info = message;
-        super.initCause(cause);
+        this.message = message;
+    }
+
+    public AppException(GlobalServiceStatusCode statusCode) {
+        super(statusCode.getMessage());
+        this.statusCode = statusCode;
+        this.code = statusCode.getCode();
+        this.message = statusCode.getMessage();
+
     }
 
     @Override
     public String toString() {
         return "com.achobeta.x.api.types.exception.XApiException{" +
                 "code='" + code + '\'' +
-                ", info='" + info + '\'' +
+                ", info='" + message + '\'' +
                 '}';
     }
 
