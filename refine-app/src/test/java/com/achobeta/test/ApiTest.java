@@ -34,6 +34,7 @@ public class ApiTest {
     @Test
     public void testA() {
 //        Set<ConstraintViolation<Dog>> violations = validator.validate(new Dog("zhangsan111"));
+
         Set<ConstraintViolation<Dog>> violations = validator.validate(new Dog("111"));
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
