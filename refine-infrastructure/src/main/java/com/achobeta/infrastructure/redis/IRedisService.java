@@ -1,4 +1,4 @@
-package com.achobeta.domain;
+package com.achobeta.infrastructure.redis;
 
 import org.redisson.api.*;
 

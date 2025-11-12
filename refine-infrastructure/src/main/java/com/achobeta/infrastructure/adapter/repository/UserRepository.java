@@ -3,7 +3,9 @@ package com.achobeta.infrastructure.adapter.repository;
 import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.infrastructure.dao.UserAccountMapper;
+import com.achobeta.infrastructure.redis.IRedisService;
 import com.achobeta.types.support.id.SnowflakeIdWorker;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +16,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class UserRepository implements IUserRepository {
+
+    @Resource
+    private IRedisService redis;
 
     private final UserAccountMapper userAccountMapper;
 
@@ -49,5 +54,38 @@ public class UserRepository implements IUserRepository {
     public void updateByUserAccount(UserEntity user, String account) {
         userAccountMapper.update(user, account);
     }
+
+    /**
+     * redis set操作
+     *
+     * @param key
+     * @param value
+     * @param timeout
+     */
+    @Override
+    public void setValue(String key, String value, long timeout) {
+        redis.setValue(key, value, timeout);
+    }
+
+    /**
+     * redis get操作
+     *
+     * @param key
+     */
+    @Override
+    public String getValue(String key) {
+        return redis.getValue(key);
+    }
+
+    /**
+     * redis del操作
+     *
+     * @param key
+     */
+    @Override
+    public void delValue(String key) {
+        redis.remove(key);
+    }
+
 
 }

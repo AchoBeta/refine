@@ -16,6 +16,9 @@ public enum GlobalServiceStatusCode {
     /* 成功, 默认200 */
     SYSTEM_SUCCESS(200, "操作成功"),
 
+    //401, access-token 过期
+    UNAUTHORIZED(401, "access-token 过期，请用 refresh-token 刷新"),
+
     /* 系统错误 负数 */
     SYSTEM_SERVICE_FAIL(-4396, "操作失败"),
     SYSTEM_SERVICE_ERROR(-500, "系统异常"),

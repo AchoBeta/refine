@@ -3,8 +3,13 @@ package com.achobeta.types.exception;
 import static com.achobeta.types.enums.GlobalServiceStatusCode.PARAM_FAILED_VALIDATE;
 
 import com.achobeta.types.Response;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.achobeta.types.enums.GlobalServiceStatusCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
@@ -58,6 +63,21 @@ public class GlobalExceptionHandler {
 
         return Response.CUSTOMIZE_MSG_ERROR(PARAM_FAILED_VALIDATE, message);
     }
+
+    /**
+     * 专门捕获AppException及其子类
+     */
+    @ExceptionHandler(AppException.class)
+    public Response<?> handleRuntimeException(AppException e) {
+        // 日志记录异常栈（便于排查，建议保留）
+        e.printStackTrace();
+        // 封装异常消息并返回
+        if (e.getStatusCode() != null) {
+            return Response.CUSTOMIZE_MSG_ERROR(e.getStatusCode(), e.getMessage());
+        }
+        return Response.CUSTOMIZE_MSG_ERROR(GlobalServiceStatusCode.SYSTEM_SERVICE_ERROR, e.getMessage());
+    }
+
 
 
 }

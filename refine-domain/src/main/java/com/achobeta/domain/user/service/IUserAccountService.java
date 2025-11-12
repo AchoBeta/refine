@@ -2,6 +2,9 @@ package com.achobeta.domain.user.service;
 
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.types.exception.AppException;
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.Map;
 
 /**
  * @author liangchaowen
@@ -36,5 +39,7 @@ public interface IUserAccountService {
 
     void updatePassword(String userId, String oldPassword, String newPassword);
 
+    void logout(String refreshToken);
 
+    Map<String, String> refreshToken(String refreshToken);
 }

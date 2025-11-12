@@ -29,4 +29,19 @@ public interface IUserRepository {
      */
     void updateByUserAccount(UserEntity user, String account);
 
+    /**
+     * redis set操作
+     */
+    void setValue(String key, String value, long timeout);
+
+    /**
+     * redis get操作
+     */
+    String getValue(String key);
+
+    /**
+     * redis del操作
+     */
+    void delValue(String key);
+
 }

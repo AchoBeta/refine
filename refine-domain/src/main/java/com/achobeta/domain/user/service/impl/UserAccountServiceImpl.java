@@ -1,19 +1,25 @@
 package com.achobeta.domain.user.service.impl;
 
-import com.achobeta.domain.IRedisService;
+import cn.hutool.jwt.JWT;
 import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;
+import com.achobeta.domain.user.service.Jwt;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.util.StringTools;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.achobeta.types.common.Constants.*;
 
@@ -22,13 +28,14 @@ import static com.achobeta.types.common.Constants.*;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserAccountServiceImpl implements IUserAccountService {
 
     private final IEmailVerificationService emailVerificationService;
 
     private final IUserRepository userRepository;
 
-    private final IRedisService redis;
+    private final Jwt jwt;
 
 
     /**
@@ -87,16 +94,15 @@ public class UserAccountServiceImpl implements IUserAccountService {
         if (1 != user.getUserStatus()) {
             throw new AppException(GlobalServiceStatusCode.USER_ACCOUNT_LOCKED);
         }
-        // 生成token
-        String token = UUID.randomUUID().toString().replace("-", "");
-
-        // 保存token到缓存
-        redis.setValue(USER_ID_KEY_PREFIX + token, user.getUserId(), USER_TOKEN_EXPIRED_SECONDS);
+        // 生成token, refresh-token自动写入Redis
+        String accessToken = jwt.createAccessToken(user.getUserId(), null);
+        String refreshToken = jwt.createRefreshToken(user.getUserId());
 
         return UserLoginVO.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
-                .token(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
 
     }
@@ -104,9 +110,9 @@ public class UserAccountServiceImpl implements IUserAccountService {
     /**
      * 重置密码
      *
-     * @param userEmail    邮箱
-     * @param newPassword  新密码
-     * @param checkCode    验证码
+     * @param userEmail   邮箱
+     * @param newPassword 新密码
+     * @param checkCode   验证码
      * @return 重置成功
      * @throws AppException 邮箱不存在、验证码无效等异常
      */
@@ -132,6 +138,16 @@ public class UserAccountServiceImpl implements IUserAccountService {
         }
         user.encryptPassword(newPassword);
         userRepository.updateByUserAccount(user, user.getUserAccount());
+    }
+
+    @Override
+    public void logout(String refreshToken) {
+        jwt.invalidateRefreshToken(refreshToken);
+    }
+
+    @Override
+    public Map<String, String> refreshToken(String refreshToken) {
+        return jwt.refreshAccessToken(refreshToken, null);
     }
 
 

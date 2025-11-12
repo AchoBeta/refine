@@ -86,7 +86,7 @@
             <if test="user.userPassword != null and user.userPassword != ''">
                 user_password = #{user.userPassword},
             </if>
-            <if test="user.userStatus != null and user.userStatus != ''">
+            <if test="user.userStatus != null">
                 user_status = #{user.userStatus},
             </if>
         </set>

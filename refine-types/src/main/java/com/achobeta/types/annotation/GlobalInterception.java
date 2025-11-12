@@ -9,6 +9,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GlobalInterception {
 
+    /**
+     * 是否检查登录
+     *
+     * @return true 检查登录，false 不检查登录
+     */
     boolean checkLogin() default true;
 
 }

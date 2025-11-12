@@ -119,4 +119,13 @@ public final class Response<T> implements Serializable {
             .build();
     }
 
+    //token异常
+    public static <T> Response<T> CUSTOMIZE_MSG_ERROR(Integer code, String msg, T data) {
+        return Response.<T>builder()
+            .code(code)
+            .info(msg)
+            .data(data)
+            .build();
+    }
+
 }

@@ -2,23 +2,21 @@ package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.userAccount.LoginRequestDTO;
 import com.achobeta.api.dto.userAccount.RegisterRequestDTO;
-import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
-import jakarta.servlet.http.HttpServletRequest;
+import com.achobeta.types.common.UserContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @author liangchaowen
@@ -35,7 +33,6 @@ public class UserAccountController {
 
     private final IUserAccountService userAccountService;
 
-    private final IRedisService redis;
 
     /**
      * 发送邮箱验证码
@@ -44,7 +41,7 @@ public class UserAccountController {
      * @return 发送成功
      */
     @PostMapping("/sendEmailCode")
-    public Response sendEmailCode(String userAccount) {
+    public Response sendEmailCode(@NotBlank(message = "接收验证码邮箱不能为空") String userAccount) {
         emailVerificationService.sendEmailCode(userAccount);
         return Response.SYSTEM_SUCCESS();
     }
@@ -58,14 +55,15 @@ public class UserAccountController {
     @PostMapping("/login")
     public Response<UserLoginVO> login(@RequestBody LoginRequestDTO request) {
         UserLoginVO user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
+        log.info("用户 {} 登录", request.getUserAccount());
         return Response.SYSTEM_SUCCESS(user);
     }
 
     @GlobalInterception
     @PostMapping("/logout")
-    public Response logout(HttpServletRequest request) {
-        String token = request.getHeader("token");
-        redis.remove(Constants.USER_ID_KEY_PREFIX + token);
+    public Response logout(@RequestHeader("refresh-token") String refreshToken) {
+        userAccountService.logout(refreshToken);
+        log.info("用户 {} 登出", UserContext.getUserId());
         return Response.SYSTEM_SUCCESS();
     }
 
@@ -76,6 +74,7 @@ public class UserAccountController {
     @Validated
     public Response resetPassword(@NotBlank String userEmail, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword, @NotBlank String checkCode) {
         userAccountService.resetPassword(userEmail, newPassword, checkCode);
+        log.info("账号 {} 重置密码", userEmail);
         return Response.SYSTEM_SUCCESS();
     }
 
@@ -84,11 +83,18 @@ public class UserAccountController {
      */
     @GlobalInterception
     @PostMapping("/updatePassword")
-    public Response updatePassword(HttpServletRequest request, @NotBlank String oldPassword, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword) {
-        String token = request.getHeader("token");
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    public Response updatePassword(@NotBlank String oldPassword, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword) {
+        String userId = UserContext.getUserId();
         userAccountService.updatePassword(userId, oldPassword, newPassword);
+        log.info("userId {} 修改密码", userId);
         return Response.SYSTEM_SUCCESS();
+    }
+
+
+    @PostMapping("/refreshToken")
+    public Response<Map<String, String>> refreshToken(@RequestHeader("refresh-token") String refreshToken) {
+        Map<String, String> newToken = userAccountService.refreshToken(refreshToken);
+        return Response.SYSTEM_SUCCESS(newToken);
     }
 
 }
