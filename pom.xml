@@ -52,6 +52,42 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- 阿里云 SDK -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dashscope-sdk-java</artifactId>
+                <version>2.13.0</version>
+            </dependency>
+            <!-- PDFBox -->
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>3.0.3</version>
+            </dependency>
+            <!-- POI（DOCX 支持） -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>5.3.0</version>
+            </dependency>
+            <!-- 阿里云核心 SDK -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-core</artifactId>
+                <version>4.6.3</version>
+            </dependency>
+            <!-- 阿里云 OCR SDK -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-ocr</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <!-- 工具库（用于 Base64 编码） -->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.15</version>
+            </dependency>
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>

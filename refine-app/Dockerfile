@@ -1,5 +1,5 @@
 # 基础镜像
-FROM openjdk:8
+FROM eclipse-temurin:21-jre
 
 # 作者
 MAINTAINER bantanger
