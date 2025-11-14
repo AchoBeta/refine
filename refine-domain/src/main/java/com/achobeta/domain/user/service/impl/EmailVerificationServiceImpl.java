@@ -1,6 +1,6 @@
 package com.achobeta.domain.user.service.impl;
 
-import com.achobeta.domain.IRedisService;
+import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
@@ -31,7 +31,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
     private final JavaMailSender mailSender;
 
-    private final IRedisService redis;
+    private final IUserRepository userRepository;
 
     @Value("${email.config.verify-code-expire-minute}")
     private int CODE_EXPIRE_MINUTES; // 验证码有效期,minutes
@@ -52,10 +52,10 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
         // 检查发送频率
         String sendRecordKey = REDIS_EMAIL_RECORD_KEY + userEmail;
-        String lastSendTime = redis.getValue(sendRecordKey);
+        String lastSendTime = userRepository.getValue(sendRecordKey);
         if (lastSendTime != null) {
             LocalDateTime lastTime = LocalDateTime.parse(lastSendTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            if (Duration.between(lastTime, LocalDateTime.now()).getSeconds() < SEND_INTERVAL_SECONDS) {
+            if (Duration.between(lastTime, LocalDateTime.now()).getSeconds() * 1000 < SEND_INTERVAL_MILLISECONDS) {
                 throw new AppException("发送过于频繁，请1分钟后重试");
             }
         }
@@ -65,13 +65,13 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
         // 缓存验证码（设置过期时间，与有效期一致）
         String codeKey = REDIS_EMAIL_KEY + userEmail;
-        redis.setValue(codeKey, code, CODE_EXPIRE_MINUTES * 60L);
+        userRepository.setValue(codeKey, code, CODE_EXPIRE_MINUTES * 60 * 1000L);
 
         // 记录发送时间（用于频率限制）
-        redis.setValue(
-            sendRecordKey,
-            LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            SEND_INTERVAL_SECONDS
+        userRepository.setValue(
+                sendRecordKey,
+                LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                SEND_INTERVAL_MILLISECONDS
         );
 
         // 发送验证码邮件
@@ -79,7 +79,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
             sendVerificationEmail(userEmail, code);
         } catch (MessagingException e) {
             // 发送失败时清理缓存,避免验证码残留
-            redis.remove(codeKey);
+            userRepository.delValue(codeKey);
             throw new AppException("验证码发送失败，请稍后重试");
         }
     }
@@ -97,7 +97,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
         // 2. 从缓存获取验证码
         String codeKey = REDIS_EMAIL_KEY + userEmail;
-        String cachedCode = redis.getValue(codeKey);
+        String cachedCode = userRepository.getValue(codeKey);
 
         // 3. 验证验证码
         if (null == cachedCode) {
@@ -108,7 +108,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
         }
 
         // 验证通过后删除缓存（避免重复使用）
-        redis.remove(codeKey);
+        userRepository.delValue(codeKey);
     }
 
 
@@ -128,13 +128,13 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
         helper.setSubject("注册验证码"); // 邮件主题
         // 邮件内容（HTML格式，清晰提示有效期）
         String content = String.format(
-            "<div style='font-size:14px'>" +
-            "您好，您正在注册错题整理系统，验证码为：<br>" +
-            "<div style='font-size:20px;color:#ff4d4f;font-weight:bold;margin:10px 0'>%s</div>" +
-            "验证码%d分钟内有效，请勿泄露给他人。<br>" +
-            "如果不是您本人操作，请忽略此邮件。" +
-            "</div>",
-            code, CODE_EXPIRE_MINUTES
+                "<div style='font-size:14px'>" +
+                        "您好，您正在注册错题整理系统，验证码为：<br>" +
+                        "<div style='font-size:20px;color:#ff4d4f;font-weight:bold;margin:10px 0'>%s</div>" +
+                        "验证码%d分钟内有效，请勿泄露给他人。<br>" +
+                        "如果不是您本人操作，请忽略此邮件。" +
+                        "</div>",
+                code, CODE_EXPIRE_MINUTES
         );
         helper.setText(content, true); // 支持HTML
 

@@ -1,8 +1,5 @@
 # 忽略所有 application.yml 及其环境变体（如 application-dev.yml）
-**/application.yaml
-**/application.yml
-**/application-*.yaml
-**/application-*.yml
+**/refine-app/src/main/resources/application-dev.yml
 
 target/
 !.mvn/wrapper/maven-wrapper.jar

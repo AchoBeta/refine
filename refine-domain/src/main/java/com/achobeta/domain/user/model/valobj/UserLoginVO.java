@@ -11,7 +11,9 @@ public class UserLoginVO {
 
     private String userId;
     private String userName;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
+
 
 
 }
