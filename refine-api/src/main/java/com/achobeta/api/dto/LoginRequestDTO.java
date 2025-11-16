@@ -1,4 +1,4 @@
-package com.achobeta.api.dto.userAccount;
+package com.achobeta.api.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;

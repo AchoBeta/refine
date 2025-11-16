@@ -1,7 +1,7 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.api.dto.userAccount.LoginRequestDTO;
-import com.achobeta.api.dto.userAccount.RegisterRequestDTO;
+import com.achobeta.api.dto.LoginRequestDTO;
+import com.achobeta.api.dto.RegisterRequestDTO;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;

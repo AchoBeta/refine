@@ -35,12 +35,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.aspectj</groupId>-->
-<!--            <artifactId>aspectjweaver</artifactId>-->
-<!--            <version>1.9.21</version> &lt;!&ndash; 3.x 最优兼容版本 &ndash;&gt;-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -112,7 +106,6 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>
-            <version>1.1.0-beta7</version>
         </dependency>
 
         <!-- 工程模块；启动依赖 trigger->domain, infrastructure-->

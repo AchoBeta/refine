@@ -1,6 +1,6 @@
 package com.achobeta.domain.question.adapter.port;
 
-import com.achobeta.api.dto.question.QuestionResponseDTO;
+import com.achobeta.domain.question.model.valobj.QuestionResponseVO;
 import dev.langchain4j.service.SystemMessage;
 
 /**
@@ -9,8 +9,6 @@ import dev.langchain4j.service.SystemMessage;
 public interface AiGenerationService {
 
     @SystemMessage(fromResource = "AiGeneration.txt")
-    QuestionResponseDTO Generation(String message);
-
-
+    QuestionResponseVO Generation(String message);
 
 }

@@ -29,8 +29,6 @@ import java.lang.reflect.Method;
 @RequiredArgsConstructor
 public class GlobalOperationAspect {
 
-    private final IRedisService redis;
-
     private final JwtTool jwtTool;
 
     /**
@@ -47,10 +45,10 @@ public class GlobalOperationAspect {
             checkLogin();
         } catch (UnauthorizedException e) {
             log.error("登录验证失败：{}", e.getMessage());
-            throw e;
+            throw new AppException(e.getMessage());
         } catch (AppException e) {
             log.error("全局拦截异常", e);
-            throw e;
+            throw new AppException(e.getMessage());
         } catch (Throwable e) {
             log.error("全局拦截异常", e);
             throw new AppException(GlobalServiceStatusCode.PARAM_FAILED_VALIDATE);
@@ -87,7 +85,7 @@ public class GlobalOperationAspect {
             // JwtTool 内部校验签名和过期
             userId = jwtTool.parseAccessToken(token);
         } catch (UnauthorizedException e) {
-            throw new AppException(e.getMessage());
+            throw new UnauthorizedException(e.getMessage());
         }
         // 存入上下文
         UserContext.setUserId(userId);

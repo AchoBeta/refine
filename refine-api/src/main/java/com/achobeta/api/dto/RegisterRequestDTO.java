@@ -1,4 +1,4 @@
-package com.achobeta.api.dto.userAccount;
+package com.achobeta.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
