@@ -11,9 +11,8 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,10 +30,10 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(RagConfigProperties.class)
 public class RagConfig {
 
-    @Resource
-    private EmbeddingModel qwenEmbeddingModel;
+    @Autowired
+    private EmbeddingModel embeddingModel;
 
-    @Resource
+    @Autowired
     private RagConfigProperties ragConfigProperties;
 
     private EmbeddingStore<TextSegment> embeddingStore;
@@ -48,7 +47,7 @@ public class RagConfig {
                 .user(ragConfigProperties.getUser())
                 .password(ragConfigProperties.getPassword())
                 .table("knowledge_embeddings")
-                .dimension(qwenEmbeddingModel.dimension())
+                .dimension(embeddingModel.dimension())
                 .build();
         log.info("EmbeddingStore初始化完成");
     }
@@ -87,7 +86,7 @@ public class RagConfig {
                                 textSegment.metadata().getString("file_name") + "\n" + textSegment.text(),
                                 textSegment.metadata()
                         ))
-                        .embeddingModel(qwenEmbeddingModel)
+                        .embeddingModel(embeddingModel)
                         .embeddingStore(embeddingStore)
                         .build();
                 // 加载文档
@@ -103,7 +102,7 @@ public class RagConfig {
         // 自定义内容加载器
         EmbeddingStoreContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
-                .embeddingModel(qwenEmbeddingModel)
+                .embeddingModel(embeddingModel)
                 .maxResults(5) // 最多返回5条结果
                 .minScore(0.75) // 过滤掉分数小于0.75的结果
                 .build();
