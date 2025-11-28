@@ -1,4 +1,4 @@
-package com.achobeta.trigger.http.dto;
+package com.achobeta.api.dto;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

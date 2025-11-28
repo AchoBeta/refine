@@ -39,7 +39,6 @@ public class aiService implements IAiService {
      */
     private static final Logger logger = LoggerFactory.getLogger(aiService.class);
 
-    
 
     /**
      * API密钥，用于访问大模型服务。
@@ -204,7 +203,26 @@ public class aiService implements IAiService {
                     .content(combinedPrompt)
                     .build();
 
-             // 构建调用参数
+            // 构建调用参数
+            _streamCallWithMessage(gen, combineMsg, contentCallback);
+        } catch (ApiException | NoApiKeyException | InputRequiredException e) {
+            logger.error("An exception occurred: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    public void aiChat(String question, Consumer<String> contentCallback) {
+        try {
+            // 创建大模型实例
+            Generation gen = new Generation();
+
+            // 构建用户消息，将问题传入
+            Message combineMsg = Message.builder()
+                    .role(Role.USER.getValue())
+                    .content(question)
+                    .build();
+
+            // 构建调用参数
             _streamCallWithMessage(gen, combineMsg, contentCallback);
         } catch (ApiException | NoApiKeyException | InputRequiredException e) {
             logger.error("An exception occurred: {}", e.getMessage());
@@ -224,7 +242,7 @@ public class aiService implements IAiService {
         try {
             // 使用无锁的并发队列来收集响应片段
             ConcurrentLinkedQueue<String> responseQueue = new ConcurrentLinkedQueue<>();
-            
+
             // 创建大模型实例
             Generation gen = new Generation();
 
@@ -246,18 +264,18 @@ public class aiService implements IAiService {
 
             // 流式输出结束后换行
             System.out.println();
-            
+
             // 将队列中的所有片段合并为完整响应
             StringBuilder completeResponse = new StringBuilder();
             String fragment;
             while ((fragment = responseQueue.poll()) != null) {
                 completeResponse.append(fragment);
             }
-            
+
             // 打印完整的收集内容
             System.out.println("\n=== 完整的AI回复内容 ===");
             System.out.println(completeResponse.toString());
-            
+
             // 通知调用方AI回复已完成，让应用服务层保存到Redis
             if (contentCallback != null) {
                 // 通过回调通知AI回复完成，让上层服务保存到Redis
@@ -281,15 +299,15 @@ public class aiService implements IAiService {
                 .content("""
                         你是一位专业的解题助手，能够根据之前的对话历史为用户提供连贯的解答。
                         请根据上下文理解用户的问题，并提供准确、详细的解答。
-
+                        
                         **解题格式要求：**
-
+                        
                         【题目分析】
                         - 仔细阅读题目，理解题目的背景、条件和要求
                         - 明确已知条件和待求目标
                         - 分析题目的类型和特点
                         - 指出解题的关键点和可能的突破口
-
+                        
                         【解题过程】
                         - 按照逻辑顺序，逐步展示完整的解题步骤
                         - 每一步都要有清晰的推理和计算过程
@@ -367,7 +385,7 @@ public class aiService implements IAiService {
                 String content = message.getContent();
                 // 使用无锁的ConcurrentLinkedQueue，性能更好
                 responseQueue.offer(content);
-                
+
                 // 实时打印当前片段，便于观察流式输出过程
                 System.out.print(content);
 
@@ -399,7 +417,7 @@ public class aiService implements IAiService {
             // 只获取content内容并直接处理
             if (message != null && message.getContent() != null) {
                 String content = message.getContent();
-                
+
                 // 实时打印当前片段，便于观察流式输出过程
                 System.out.print(content);
 
@@ -416,14 +434,14 @@ public class aiService implements IAiService {
     // 流式调用大模型
     public void _streamCallWithMessage(Generation gen, Message userMsg, Consumer<String> contentCallback)
             throws NoApiKeyException, ApiException, InputRequiredException {
-        
+
         GenerationParam param = _buildGenerationParam(userMsg);
         Flowable<GenerationResult> result = gen.streamCall(param);
         result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
 
         // 流式输出结束后换行
         System.out.println();
-        
+
         // 注意：这个方法主要用于单次问答，不带上下文的场景
         // 对于这种场景，通常不需要保存完整响应到Redis，只需要流式输出即可
         // 如果需要完整响应，请使用 aiSolveQuestionWithContext 方法

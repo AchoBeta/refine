@@ -18,10 +18,10 @@ import java.util.List;
 @Slf4j
 @Component
 public class UserLoginEventListener {
-    
+
     @Autowired
     private LearningAnalysisService learningAnalysisService;
-    
+
     /**
      * 监听用户登录事件
      */
@@ -30,13 +30,9 @@ public class UserLoginEventListener {
         try {
             String userId = event.getUserId();
             log.info("检测到用户登录，开始分析学习动态，userId:{}", userId);
-            
+
             // 异步分析用户学习动态
             List<LearningDynamicVO> dynamics = learningAnalysisService.onUserLogin(userId);
-            
-            // 这里可以将分析结果缓存到Redis，供前端获取
-            // 或者通过WebSocket推送给前端
-            
         } catch (Exception e) {
             log.error("处理用户登录事件失败", e);
         }

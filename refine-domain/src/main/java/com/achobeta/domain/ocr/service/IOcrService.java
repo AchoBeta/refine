@@ -12,10 +12,11 @@ public interface IOcrService {
     /**
      * 从用户上传的文件中提取第一道题目
      *
+     * @param userId    用户ID
      * @param fileBytes 文件字节数组
      * @param fileType  文件类型
      * @return 第一道题目信息
      */
-    QuestionEntity extractQuestionContent(byte[] fileBytes, String fileType);
+    QuestionEntity extractQuestionContent(String userId, byte[] fileBytes, String fileType);
 
 }

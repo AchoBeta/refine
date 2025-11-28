@@ -1,4 +1,4 @@
-package com.achobeta.types.conversation;
+package com.achobeta.api.dto;
 
 import lombok.Data;
 import lombok.Builder;

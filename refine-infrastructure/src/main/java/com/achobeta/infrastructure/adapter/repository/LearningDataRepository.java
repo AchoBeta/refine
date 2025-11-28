@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository
 public class LearningDataRepository implements ILearningDataRepository {
-    
+
     @Autowired
     private IVectorDao vectorDao;
-    
+
     @Override
     public List<LearningVectorEntity> getUserRecentLearningData(String userId, int days) {
         try {
@@ -38,7 +38,7 @@ public class LearningDataRepository implements ILearningDataRepository {
             return Collections.emptyList();
         }
     }
-    
+
     @Override
     public LearningStatisticsVO getUserLearningStatistics(String userId, int days) {
         try {
@@ -46,7 +46,7 @@ public class LearningDataRepository implements ILearningDataRepository {
             if (statistics == null || statistics.isEmpty()) {
                 return null;
             }
-            
+
             return LearningStatisticsVO.builder()
                     .totalActivities(getIntValue(statistics, "total_activities"))
                     .actionTypesCount(getIntValue(statistics, "action_types_count"))
@@ -55,13 +55,13 @@ public class LearningDataRepository implements ILearningDataRepository {
                     .firstActivity(getTimestampValue(statistics, "first_activity"))
                     .lastActivity(getTimestampValue(statistics, "last_activity"))
                     .build();
-                    
+
         } catch (Exception e) {
             log.error("获取用户学习统计失败，userId:{} days:{}", userId, days, e);
             return null;
         }
     }
-    
+
     @Override
     public List<Map<String, Object>> getUserLearningDataBySubject(String userId, int days) {
         try {
@@ -71,7 +71,7 @@ public class LearningDataRepository implements ILearningDataRepository {
             return Collections.emptyList();
         }
     }
-    
+
     @Override
     public List<Map<String, Object>> getUserLearningDataByActionType(String userId, int days) {
         try {
@@ -81,7 +81,7 @@ public class LearningDataRepository implements ILearningDataRepository {
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 转换为领域实体
      */
@@ -100,7 +100,7 @@ public class LearningDataRepository implements ILearningDataRepository {
                 .updatedAt(po.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * 安全获取整数值
      */
@@ -116,7 +116,7 @@ public class LearningDataRepository implements ILearningDataRepository {
             return 0;
         }
     }
-    
+
     /**
      * 安全获取时间戳值
      */

@@ -1,18 +1,19 @@
 package com.achobeta.infrastructure.adapter.repository;
 
-import com.achobeta.domain.rag.service.IVectorService;
-import com.achobeta.domain.rag.model.valobj.SimilarQuestionVO;
 import com.achobeta.domain.rag.model.valobj.LearningInsightVO;
+import com.achobeta.domain.rag.model.valobj.SimilarQuestionVO;
+import com.achobeta.domain.rag.service.IVectorService;
 import com.achobeta.infrastructure.dao.IVectorDao;
 import com.achobeta.infrastructure.dao.po.LearningVector;
 import com.achobeta.infrastructure.gateway.DashScopeEmbeddingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.achobeta.types.enums.ActionType.MISTAKE;
 
 /**
  * 向量数据库适配器实现
@@ -27,13 +28,21 @@ public class VectorRepository implements IVectorService {
     @Autowired
     private DashScopeEmbeddingService embeddingService; // 使用DashScope嵌入服务
 
-    @Value("${dashscope.apiKey}")
-    private String apiKey;
-
     public VectorRepository(DashScopeEmbeddingService embeddingService) {
         this.embeddingService = embeddingService;
     }
 
+    /**
+     * 存储学习向量信息
+     *
+     * @param userId           用户ID
+     * @param questionId       题目ID
+     * @param questionContent  题目内容
+     * @param actionType       操作类型
+     * @param subject          科目
+     * @param knowledgePointId 知识点ID
+     * @return 存储成功返回true，失败返回false
+     */
     @Override
     public boolean storeLearningVector(String userId, String questionId, String questionContent,
                                        String actionType, String subject, Integer knowledgePointId) {
@@ -68,6 +77,15 @@ public class VectorRepository implements IVectorService {
         }
     }
 
+
+    /**
+     * 搜索与给定文本相似的题目。
+     *
+     * @param userId    用户ID，用于限定搜索范围
+     * @param queryText 查询文本，将被转换为向量进行相似度匹配
+     * @param limit     返回结果的最大数量限制
+     * @return 相似的题目列表，封装为 SimilarQuestionVO 对象；若发生异常则返回空列表
+     */
     @Override
     public List<SimilarQuestionVO> searchSimilarQuestions(String userId, String queryText, int limit) {
         try {
@@ -89,11 +107,17 @@ public class VectorRepository implements IVectorService {
         }
     }
 
+    /**
+     * 获取用户的薄弱知识点分析结果。
+     *
+     * @param userId 用户ID
+     * @return 用户的薄弱点信息列表，封装为 LearningInsightVO 对象；若发生异常则返回空列表
+     */
     @Override
     public List<LearningInsightVO> getUserWeaknesses(String userId) {
         try {
             // 分析用户错题模式
-            List<LearningVector> userVectors = vectorDao.getUserVectorsByActionType(userId, "mistake");
+            List<LearningVector> userVectors = vectorDao.getUserVectorsByActionType(userId, MISTAKE.getActionType());
 
             // 使用聚类分析找出薄弱点
             return analyzeWeaknesses(userVectors);
@@ -104,6 +128,12 @@ public class VectorRepository implements IVectorService {
         }
     }
 
+    /**
+     * 根据用户的学习行为数据生成个性化推荐内容。
+     *
+     * @param userId 用户ID
+     * @return 推荐内容列表，封装为 LearningInsightVO 对象；若发生异常则返回空列表
+     */
     @Override
     public List<LearningInsightVO> getUserRecommendations(String userId) {
         try {
@@ -119,6 +149,11 @@ public class VectorRepository implements IVectorService {
         }
     }
 
+    /**
+     * 分析指定用户的学习行为模式，并将分析结果保存到数据库中。
+     *
+     * @param userId 用户ID
+     */
     @Override
     public void analyzeUserLearningPatterns(String userId) {
         try {
@@ -145,6 +180,7 @@ public class VectorRepository implements IVectorService {
             log.error("分析用户学习模式失败，userId:{}", userId, e);
         }
     }
+
 
     /**
      * 构建向量化文本

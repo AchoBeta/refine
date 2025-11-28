@@ -43,7 +43,7 @@ public class GlobalOperationAspect {
             checkLogin();
         } catch (UnauthorizedException e) {
             log.error("登录验证失败：{}", e.getMessage());
-            throw new AppException(e.getMessage());
+            throw new AppException(e.getCode(),e.getMessage());
         } catch (AppException e) {
             log.error("全局拦截异常", e);
             throw new AppException(e.getMessage());

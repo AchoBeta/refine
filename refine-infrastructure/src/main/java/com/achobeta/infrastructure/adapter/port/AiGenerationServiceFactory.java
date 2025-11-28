@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class AiGenerationServiceFactory {
 
     @Resource
-    private ChatModel qwenChatModel;
+    private ChatModel myQwenChatModel;
 
     @Resource
     private StreamingChatModel qwenStreamingChatModel;
@@ -27,7 +27,7 @@ public class AiGenerationServiceFactory {
     @Bean
     public AiGenerationService aiGenerationService() {
         AiGenerationService build = AiServices.builder(AiGenerationService.class)
-                .chatModel(qwenChatModel)
+                .chatModel(myQwenChatModel)
                 .streamingChatModel(qwenStreamingChatModel) //流式输出
                 .contentRetriever(contentRetriever) // RAG检索增强
                 .build();

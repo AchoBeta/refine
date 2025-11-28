@@ -30,6 +30,8 @@ thread:
 
 # 数据库配置；启动时配置数据库资源信息
 spring:
+  main:
+    allow-bean-definition-overriding: true
   autoconfigure:
     exclude:
       #      - org.redisson.spring.starter.RedissonAutoConfigurationV2
@@ -125,7 +127,7 @@ redis:
 
 pgvector:
   config:
-    host: ${PGVECTOR_IP:pgvector}
+    host: ${PGVECTOR_IP:postgres}
     port: 5432
     database: postgres
     user: root
@@ -161,7 +163,7 @@ langchain4j:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-ttl: 2h
+  access-token-ttl: 100d
   refresh-token-ttl: 2d
 
 ai:

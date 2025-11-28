@@ -19,6 +19,13 @@ public class MistakeReasonServiceImpl implements IMistakeReasonService {
 
     private final IMistakeReasonRepository mistakeReasonRepository;
 
+    /**
+     * 切换错因状态
+     *
+     * @param reasonVO   错因信息
+     * @param reasonName 错因名称
+     * @return 切换结果
+     */
     @Override
     public MistakeReasonVO toggleMistakeReason(MistakeReasonVO reasonVO, String reasonName) {
         try {

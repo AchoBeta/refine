@@ -1,23 +1,24 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.domain.auth.service.IAuthService;
 import com.achobeta.domain.conversation.service.IConversationService;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
-import com.achobeta.types.conversation.*;
+import com.achobeta.types.conversation.AiResponseHandler;
+import com.achobeta.api.dto.SendMessageRequestDTO;
+import com.achobeta.api.dto.SolveWithContextRequestDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import jakarta.validation.Valid;
 import java.io.IOException;
 
 /**
  * @Auth : Malog
- * @Desc : 会话控制器 - 处理AI对话相关的请求（纯Redis实现）
+ * @Desc : 处理AI对话相关的请求
  * @Time : 2025/11/11
  */
 @Slf4j
@@ -40,28 +41,36 @@ public class ConversationController {
         try {
             log.info("发送消息开始，conversationId:{}", requestDTO.getConversationId());
 
+            // 创建AI回复处理器
+            AiResponseHandler responseHandler = AiResponseHandler.builder()
+                    .onStreaming(pureContent -> {
+                        try {
+                            emitter.send(SseEmitter.event().data(pureContent));
+                        } catch (IOException e) {
+                            log.error("发送SSE流式事件失败", e);
+                            emitter.completeWithError(e);
+                        }
+                    })
+                    .onCompleted(pureContent -> {
+                        try {
+                            emitter.send(SseEmitter.event().data(pureContent));
+                        } catch (IOException e) {
+                            log.error("发送SSE完成事件失败", e);
+                            emitter.completeWithError(e);
+                        }
+                    })
+                    .onError(errorContent -> {
+                        log.error("AI回复错误: {}", errorContent);
+                        emitter.completeWithError(new RuntimeException("AI回复错误: " + errorContent));
+                    })
+                    .onFinish(emitter::complete)
+                    .build();
+
             // 调用会话服务，使用Redis存储上下文
             boolean success = conversationService.sendMessageWithStream(
                     requestDTO.getConversationId(),
                     requestDTO.getMessage(),
-                    content -> {
-                        try {
-                            // 检查是否是AI回复完成的特殊标记
-                            if (content.startsWith("###AI_RESPONSE_END###")) {
-                                // 移除特殊标记，只发送纯内容给前端
-                                String pureContent = content.substring("###AI_RESPONSE_END###".length());
-                                emitter.send(SseEmitter.event().data(pureContent));
-                                // AI回复完成，结束SSE连接
-                                emitter.complete();
-                            } else {
-                                // 普通流式输出
-                                emitter.send(SseEmitter.event().data(content));
-                            }
-                        } catch (IOException e) {
-                            log.error("发送SSE事件失败", e);
-                            emitter.completeWithError(e);
-                        }
-                    });
+                    responseHandler::handle);
 
             if (!success) {
                 log.error("发送消息失败，conversationId:{}", requestDTO.getConversationId());
@@ -95,28 +104,36 @@ public class ConversationController {
 
             log.info("基于错题ID的AI对话开始，userId:{} questionId:{}", userId, requestDTO.getQuestionId());
 
+            // 创建AI回复处理器
+            AiResponseHandler responseHandler = AiResponseHandler.builder()
+                    .onStreaming(pureContent -> {
+                        try {
+                            emitter.send(SseEmitter.event().data(pureContent));
+                        } catch (IOException e) {
+                            log.error("发送SSE流式事件失败", e);
+                            emitter.completeWithError(e);
+                        }
+                    })
+                    .onCompleted(pureContent -> {
+                        try {
+                            emitter.send(SseEmitter.event().data(pureContent));
+                        } catch (IOException e) {
+                            log.error("发送SSE完成事件失败", e);
+                            emitter.completeWithError(e);
+                        }
+                    })
+                    .onError(errorContent -> {
+                        log.error("AI回复错误: {}", errorContent);
+                        emitter.completeWithError(new RuntimeException("AI回复错误: " + errorContent));
+                    })
+                    .onFinish(emitter::complete)
+                    .build();
+
             // 直接使用错题ID作为会话ID进行对话（不需要创建数据库会话）
             boolean success = conversationService.sendMessageWithStream(
                     requestDTO.getQuestionId(), // 使用错题ID作为会话ID
                     requestDTO.getUserQuestion(),
-                    content -> {
-                        try {
-                            // 检查是否是AI回复完成的特殊标记
-                            if (content.startsWith("###AI_RESPONSE_END###")) {
-                                // 移除特殊标记，只发送纯内容给前端
-                                String pureContent = content.substring("###AI_RESPONSE_END###".length());
-                                emitter.send(SseEmitter.event().data(pureContent));
-                                // AI回复完成，结束SSE连接
-                                emitter.complete();
-                            } else {
-                                // 普通流式输出
-                                emitter.send(SseEmitter.event().data(content));
-                            }
-                        } catch (IOException e) {
-                            log.error("发送SSE事件失败", e);
-                            emitter.completeWithError(e);
-                        }
-                    });
+                    responseHandler::handle);
 
             if (!success) {
                 log.error("AI对话失败，questionId:{}", requestDTO.getQuestionId());

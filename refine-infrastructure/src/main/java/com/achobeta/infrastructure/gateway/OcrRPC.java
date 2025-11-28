@@ -64,8 +64,8 @@ public class OcrRPC {
             request.setSysProtocol(ProtocolType.HTTPS);
             request.setSysMethod(MethodType.POST);
             request.setSysDomain(endpoint != null && !endpoint.isEmpty()
-                ? endpoint
-                : "ocr-api.cn-hangzhou.aliyuncs.com");
+                    ? endpoint
+                    : "ocr-api.cn-hangzhou.aliyuncs.com");
             request.setSysVersion("2021-07-07");
             request.setSysAction("RecognizeEduPaper");
             // 新版 OCR API 采用 Body(JSON) 形式传参
@@ -121,7 +121,9 @@ public class OcrRPC {
         }
     }
 
-    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
 
 }
 

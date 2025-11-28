@@ -61,8 +61,7 @@ public class OcrController {
             }
 
             // 调用OCR服务提取文件中的第一个题目
-            QuestionEntity questionEntity = ocrService.extractQuestionContent(file.getBytes(), ft);
-            questionEntity.setUserId(userId);
+            QuestionEntity questionEntity = ocrService.extractQuestionContent(userId, file.getBytes(), ft);
 
             // 将错题数据保存到数据库中
             boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);

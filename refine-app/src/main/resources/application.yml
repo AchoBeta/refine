@@ -2,5 +2,5 @@ spring:
   config:
     name: refine-app
   profiles:
-    active: local
+    active: dev
 

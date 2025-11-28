@@ -18,19 +18,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class LearningAnalysisService {
-    
+
     @Autowired
     private IVectorService vectorService;
-    
-    @Autowired
-    private IAiService aiService;
-    
+
     @Autowired
     private ILearningDynamicsService learningDynamicsService;
-    
+
     /**
      * 用户登录时触发的学习动态分析
-     * 
+     *
      * @param userId 用户ID
      * @return 学习动态列表
      */
@@ -38,49 +35,49 @@ public class LearningAnalysisService {
     public List<LearningDynamicVO> onUserLogin(String userId) {
         try {
             log.info("用户登录触发学习动态分析，userId:{}", userId);
-            
+
             // 分析用户最近7天的学习动态
             List<LearningDynamicVO> dynamics = learningDynamicsService.analyzeUserLearningDynamics(userId);
-            
+
             log.info("用户登录学习动态分析完成，userId:{} 动态数量:{}", userId, dynamics.size());
             return dynamics;
-            
+
         } catch (Exception e) {
             log.error("用户登录学习动态分析失败，userId:{}", userId, e);
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 获取用户学习洞察
      */
     public List<LearningInsightVO> getUserLearningInsights(String userId) {
         try {
             log.info("获取用户学习洞察，userId:{}", userId);
-            
+
             // 先触发实时分析
             vectorService.analyzeUserLearningPatterns(userId);
-            
+
             // 获取薄弱点分析
             List<LearningInsightVO> weaknesses = vectorService.getUserWeaknesses(userId);
-            
+
             // 获取学习推荐
             List<LearningInsightVO> recommendations = vectorService.getUserRecommendations(userId);
-            
+
             // 合并结果
             List<LearningInsightVO> allInsights = new java.util.ArrayList<>();
             allInsights.addAll(weaknesses);
             allInsights.addAll(recommendations);
-            
+
             log.info("获取用户学习洞察完成，userId:{} 洞察数量:{}", userId, allInsights.size());
             return allInsights;
-            
+
         } catch (Exception e) {
             log.error("获取用户学习洞察失败，userId:{}", userId, e);
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 获取用户学习动态
      */
@@ -93,7 +90,7 @@ public class LearningAnalysisService {
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 获取用户薄弱点分析
      */
@@ -106,7 +103,7 @@ public class LearningAnalysisService {
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 获取用户学习推荐
      */
@@ -119,7 +116,7 @@ public class LearningAnalysisService {
             return Collections.emptyList();
         }
     }
-    
+
     /**
      * 手动触发用户学习分析
      */
@@ -132,15 +129,5 @@ public class LearningAnalysisService {
             log.error("手动触发用户学习分析失败，userId:{}", userId, e);
             return false;
         }
-    }
-    
-    /**
-     * 获取活跃用户列表
-     * TODO: 实现获取最近一周有学习行为的用户逻辑
-     */
-    private List<String> getActiveUsers() {
-        // 这里可以查询最近一周有学习行为的用户
-        // 例如：从user_learning_vectors表中查询最近一周有记录的用户
-        return Collections.emptyList(); // 临时返回空列表
     }
 }

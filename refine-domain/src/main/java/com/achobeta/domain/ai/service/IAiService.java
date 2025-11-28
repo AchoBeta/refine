@@ -29,6 +29,14 @@ public interface IAiService {
     void aiSolveQuestion(String question, Consumer<String> contentCallback);
 
     /**
+     * AI聊天
+     *
+     * @param question 问题内容
+     * @param contentCallback 流式回调函数
+     */
+    void aiChat(String question, Consumer<String> contentCallback);
+
+    /**
      * AI解答问题（带上下文）
      *
      * @param questionId 错题ID（作为会话ID）

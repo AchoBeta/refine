@@ -41,15 +41,14 @@ public class GlobalExceptionHandler {
     public <T> Response<T> handleValidationException(MethodArgumentNotValidException ex) {
         log.error("参数校验异常", ex);
         String message = ex.getAllErrors().stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .filter(Objects::nonNull)
-            .collect(Collectors.joining("\n"));
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
 
         return Response.CUSTOMIZE_MSG_ERROR(PARAM_FAILED_VALIDATE, message);
     }
 
     /**
-     *
      * 自定义验证异常 ConstraintViolationException
      */
     @ExceptionHandler(ConstraintViolationException.class)
@@ -57,9 +56,9 @@ public class GlobalExceptionHandler {
     public <T> Response<T> constraintViolationException(ConstraintViolationException e, HttpServletRequest request, HttpServletResponse response) {
         log.error("参数校验异常", e);
         String message = e.getConstraintViolations().stream()
-            .map(ConstraintViolation::getMessage)
-            .filter(Objects::nonNull)
-            .collect(Collectors.joining("\n"));
+                .map(ConstraintViolation::getMessage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
 
         return Response.CUSTOMIZE_MSG_ERROR(PARAM_FAILED_VALIDATE, message);
     }
@@ -75,9 +74,8 @@ public class GlobalExceptionHandler {
         if (e.getStatusCode() != null) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getStatusCode(), e.getMessage());
         }
-        return Response.CUSTOMIZE_MSG_ERROR(GlobalServiceStatusCode.SYSTEM_SERVICE_ERROR, e.getMessage());
+        return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
     }
-
 
 
 }

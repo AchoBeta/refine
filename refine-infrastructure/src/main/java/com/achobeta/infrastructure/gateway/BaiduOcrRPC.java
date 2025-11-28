@@ -3,6 +3,7 @@ package com.achobeta.infrastructure.gateway;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -18,36 +19,67 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Auth : Malog
+ * @Auth : Malog
  * @Desc : 百度OCR RPC
  * @Time : 2025/10/31
  */
+@Slf4j
 @Component
 @ConfigurationProperties(prefix = "baidu.ocr")
 public class BaiduOcrRPC {
 
-    // setters for @ConfigurationProperties
+    /**
+     * 是否启用OCR功能
+     */
     @Setter
     private boolean enabled = false;
+
+    /**
+     * API密钥
+     */
     @Setter
     private String apiKey;
+
+    /**
+     * 密钥
+     */
     @Setter
     private String secretKey;
+
+    /**
+     * 访问令牌URL地址
+     */
     @Setter
     private String accessTokenUrl = "https://aip.baidubce.com/oauth/2.0/token";
+
+    /**
+     * OCR识别服务URL地址
+     */
     @Setter
     private String ocrUrl = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic";
 
+    /**
+     * JSON对象映射器，用于序列化和反序列化JSON数据
+     */
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * 访问令牌，用于API认证授权
+     */
     private volatile String accessToken;
+
+    /**
+     * 令牌过期时间，表示accessToken的有效截止时间戳
+     */
     private volatile long tokenExpireTime = 0;
+
 
     /**
      * 识别图片并返回 JSON 字符串
      * 字段约定：
      * - provider: "baidu"
      * - version: 使用的 API 版本
-     * - text: 解析出的纯文本（尽力而为）
+     * - text: 解析出的纯文本
      * - raw: 第三方原始返回字符串
      */
     public String recognizeImage(byte[] imageBytes) {
@@ -109,7 +141,7 @@ public class BaiduOcrRPC {
         try {
             StringBuilder text = new StringBuilder();
             Map<String, Object> response = objectMapper.readValue(jsonResponse, Map.class);
-            
+
             if (response.containsKey("words_result")) {
                 Object wordsResult = response.get("words_result");
                 if (wordsResult instanceof java.util.List) {
@@ -122,7 +154,7 @@ public class BaiduOcrRPC {
                     }
                 }
             }
-            
+
             return text.toString().trim();
         } catch (Exception e) {
             return "Error extracting text: " + e.getMessage();
@@ -170,14 +202,16 @@ public class BaiduOcrRPC {
             if (tokenResponse.containsKey("access_token")) {
                 accessToken = (String) tokenResponse.get("access_token");
                 // 设置令牌过期时间（百度令牌通常有效期为30天，这里设置为29天以确保安全）
-                int expiresIn = tokenResponse.containsKey("expires_in") ? 
+                int expiresIn = tokenResponse.containsKey("expires_in") ?
                         ((Number) tokenResponse.get("expires_in")).intValue() : 2592000; // 默认30天
                 tokenExpireTime = currentTime + (expiresIn - 86400) * 1000L; // 提前一天过期
                 return accessToken;
             } else {
+                log.info("获取百度API访问令牌失败，响应内容：" + response);
                 return null;
             }
         } catch (Exception e) {
+            log.info("获取百度API访问令牌失败，异常信息：" + e.getMessage());
             return null;
         }
     }
@@ -200,5 +234,7 @@ public class BaiduOcrRPC {
         }
     }
 
-    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
 }

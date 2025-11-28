@@ -130,7 +130,7 @@ public class RagConfig {
                 );
                 PreparedStatement pstmt = conn.prepareStatement(sql)
         ) {
-            log.info("开始清空向量表：{}", "vector_table");
+            log.info("开始清空向量表：{}", "knowledge_embeddings");
             pstmt.executeUpdate();
             log.info("向量表 {} 清空成功！", "knowledge_embeddings");
 
