@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class MistakePO {
 
     private String userId;
+    private String questionId;
     private String questionContent;
     private String subject;
     private String otherReason;

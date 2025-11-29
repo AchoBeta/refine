@@ -1,6 +1,7 @@
 package com.achobeta.infrastructure.adapter.port;
 
 import com.achobeta.domain.question.adapter.port.AiGenerationService;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
@@ -30,6 +31,10 @@ public class AiGenerationServiceFactory {
                 .chatModel(myQwenChatModel)
                 .streamingChatModel(qwenStreamingChatModel) //流式输出
                 .contentRetriever(contentRetriever) // RAG检索增强
+                .chatMemoryProvider(memoryId -> MessageWindowChatMemory.builder()
+                        .maxMessages(2) // 核心：0 条消息保留 → 每次都是新会话
+                        .id(memoryId) // 仍需绑定 memoryId（即 fileName），不影响传递
+                        .build())
                 .build();
         return build;
     }

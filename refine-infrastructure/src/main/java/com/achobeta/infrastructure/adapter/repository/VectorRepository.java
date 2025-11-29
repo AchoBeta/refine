@@ -3,7 +3,7 @@ package com.achobeta.infrastructure.adapter.repository;
 import com.achobeta.domain.rag.model.valobj.LearningInsightVO;
 import com.achobeta.domain.rag.model.valobj.SimilarQuestionVO;
 import com.achobeta.domain.rag.service.IVectorService;
-import com.achobeta.infrastructure.dao.IVectorDao;
+import com.achobeta.infrastructure.dao.vector.IVectorDao;
 import com.achobeta.infrastructure.dao.po.LearningVector;
 import com.achobeta.infrastructure.gateway.DashScopeEmbeddingService;
 import lombok.extern.slf4j.Slf4j;

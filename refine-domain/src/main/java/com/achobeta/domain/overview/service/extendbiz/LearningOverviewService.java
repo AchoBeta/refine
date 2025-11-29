@@ -1,6 +1,8 @@
 package com.achobeta.domain.overview.service.extendbiz;
 
 import com.achobeta.api.dto.TrendDataDTO;
+import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
+import com.achobeta.domain.Feetback.service.feedback.extendbiz.ReviewFeedbackService;
 import com.achobeta.domain.overview.adapter.repository.IStudyOverviewRepository;
 import com.achobeta.domain.overview.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.overview.service.ILearningOverviewService;
@@ -20,13 +22,15 @@ import java.util.List;
 public class LearningOverviewService implements ILearningOverviewService{
     @Autowired
     private IStudyOverviewRepository repository;
+    @Autowired
+    private IReviewFeedbackService reviewFeedbackService;
     @Override
     public StudyOverviewVO getOverview(String userId) {
         StudyOverviewVO vo = repository.queryStudyOverview(userId);
-        if(vo == null){
-            return StudyOverviewVO.builder()
+        if(vo == null || vo.getQuestionsNum() == 0){
+            vo = StudyOverviewVO.builder()
                     .questionsNum(0)
-                    .reviewRate(0)
+                    .reviewRate(0.0)
                     .hardQuestions(0)
                     .studyTime(0)
                     .build();

@@ -1,5 +1,6 @@
 package com.achobeta.infrastructure.adapter.repository;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
 import com.achobeta.domain.question.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
@@ -37,7 +38,7 @@ public class MistakeRepository implements IMistakeRepository {
     public MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId) {
         MistakeKnowledgePO po = mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         if (null == po) {
-            throw new AppException(GlobalServiceStatusCode.PARAM_NOT_VALID);
+            throw new AppException("可能是数据库一致性问题,mistakeQuestionId:"+mistakeQuestionId);
         }
         return po;
     }

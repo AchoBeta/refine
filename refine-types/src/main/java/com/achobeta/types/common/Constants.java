@@ -20,6 +20,7 @@ public class Constants {
     public static final int SEND_INTERVAL_MILLISECONDS = 60 * 1000;
 
     public static final String USER_REFRESH_TOKEN_KEY = "user:token:refresh:";
+    public static final String USER_TOKEN_ID_KEY = "user:token:id:";
 
     // 密码正则
     public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";

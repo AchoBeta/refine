@@ -15,8 +15,9 @@ public interface ITrickyKnowledgeRepository {
      */
     @Select("select m.knowledge_point_id, k.knowledge_desc from MistakeQuestion m" +
             " join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id " +
-            "where m.user_id = #{userId} and question_status = 0 and m.create_time >= subdate(now(), 14)" +
+            "where m.user_id = #{userId} and question_status = 0 and m.create_time >= now() - interval 14 day " +
             "group by m.knowledge_point_id, k.knowledge_desc " +
             "having count(m.knowledge_point_id) >= 3")
     List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(String userId);
+
 }

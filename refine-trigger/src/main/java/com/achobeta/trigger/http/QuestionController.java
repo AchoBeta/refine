@@ -45,6 +45,8 @@ public class QuestionController {
             QuestionResponseDTO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);
             log.info("用户id: {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
             return Response.SYSTEM_SUCCESS(responseDTO);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             log.error("用户id: {} 生成题目失败，题目id: {}", userId, mistakeQuestionId, e);
             throw new AppException(e.getMessage());
@@ -62,6 +64,8 @@ public class QuestionController {
         try {
             log.info("用户id: {} 调用ai判题，题目id: {}", userId, questionId);
             return questionService.aiJudge(userId, questionId, answer);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             log.error("用户id: {} 调用ai判题失败，题目id: {}", userId, questionId, e);
             throw new AppException(e.getMessage());
@@ -80,6 +84,8 @@ public class QuestionController {
             log.info("用户 {} 记录错题，题目id: {}", userId, questionId);
             questionService.recordMistakeQuestion(userId, questionId);
             return Response.SYSTEM_SUCCESS("已加入错题");
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             log.error("用户 {} 记录错题失败，题目id: {}", userId, questionId, e);
             throw new AppException(e.getMessage());

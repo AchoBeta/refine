@@ -14,5 +14,7 @@ public class SubjectTransportMappeer {
         FIELD_MAP.put("政治", -5);
         FIELD_MAP.put("历史", -6);
         FIELD_MAP.put("语文", -7);
+        FIELD_MAP.put("地理", -8);
+        FIELD_MAP.put("生物", -9);
     }
 }

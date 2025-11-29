@@ -4,6 +4,8 @@ import com.achobeta.domain.ai.service.IAiService;
 import com.achobeta.domain.conversation.adapter.port.redis.IConversationRedisRepository;
 import com.achobeta.domain.conversation.model.entity.ConversationMessageEntity;
 import com.achobeta.domain.conversation.service.IConversationService;
+import com.achobeta.domain.ocr.adapter.port.redis.IQuestionRedisRepository;
+import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class ConversationServiceImpl implements IConversationService {
 
     private final IAiService aiService;
     private final IConversationRedisRepository conversationRedisRepository;
+    private final IQuestionRedisRepository questionRedisRepository;
 
     @Override
     public boolean sendMessageWithStream(String conversationId, String userMessage, Consumer<String> contentCallback) {
@@ -44,11 +47,23 @@ public class ConversationServiceImpl implements IConversationService {
                 log.info("未找到会话历史，使用空历史列表: conversationId={}", conversationId);
             }
 
+            // 尝试从Redis获取题目信息，如果conversationId是questionId的话
+            QuestionEntity questionEntity = questionRedisRepository.getQuestion(conversationId);
+            String contextMessage = userMessage;
+            
+            // 如果找到了题目信息，将题目内容加入到用户消息的上下文中
+            if (questionEntity != null) {
+                contextMessage = "题目内容：" + questionEntity.getQuestionText() + "\n\n用户问题：" + userMessage;
+                log.info("找到题目信息，已加入对话上下文: questionId={}", conversationId);
+            } else {
+                log.debug("未找到题目信息，使用原始用户消息: conversationId={}", conversationId);
+            }
+
             // 创建包装的回调，用于处理AI回复完成后的保存操作
             Consumer<String> wrappedCallback = createWrappedCallback(conversationId, userMessage, conversationHistory, contentCallback);
 
             // 调用AI服务获取回复（带上下文）
-            aiService.aiSolveQuestionWithContext(conversationId, userMessage, conversationHistory, wrappedCallback);
+            aiService.aiSolveQuestionWithContext(conversationId, contextMessage, conversationHistory, wrappedCallback);
 
             return true;
         } catch (Exception e) {

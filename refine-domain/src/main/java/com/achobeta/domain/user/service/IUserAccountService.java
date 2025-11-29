@@ -1,6 +1,7 @@
 package com.achobeta.domain.user.service;
 
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
+import com.achobeta.types.Response;
 import com.achobeta.types.exception.AppException;
 
 import java.util.Map;
@@ -22,7 +23,7 @@ public interface IUserAccountService {
      * @return 注册成功
      * @throws AppException 邮箱已注册等异常
      */
-    void register(String userEmail, String userPassword, String userName, String checkCode);
+    Response register(String userEmail, String userPassword, String userName, String checkCode);
 
     /**
      * 用户登录

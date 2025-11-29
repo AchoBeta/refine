@@ -6,15 +6,19 @@ import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.overview.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.overview.service.ILearningOverviewService;
 import com.achobeta.domain.overview.model.valobj.StudyOverviewVO;
+import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 
 /**
  * 学习概览接口
@@ -34,21 +38,22 @@ public class LearningOverviewController {
      */
     @GetMapping("/get_overview")
     @GlobalInterception
-    public StudyOverviewDTO getOverview() {
+    public Response<StudyOverviewDTO> getOverview() {
         String userId = UserContext.getUserId();
+        StudyOverviewVO vo = null;
         try {
             log.info("用户获取学习概览，userId:{}", userId);
-            StudyOverviewVO vo = service.getOverview(userId);
-            return StudyOverviewDTO.builder()
-                    .questionsNum(vo.getQuestionsNum())
-                    .reviewRate(vo.getReviewRate())
-                    .hardQuestions(vo.getHardQuestions())
-                    .studyTime(vo.getStudyTime())
-                    .build();
+            vo = service.getOverview(userId);
         } catch (Exception e) {
-            log.error("getOverview error", e);
-            return null;
+            return Response.CUSTOMIZE_ERROR(REQUEST_NOT_VALID);
         }
+        return Response.SYSTEM_SUCCESS(StudyOverviewDTO.builder()
+                .questionsNum(vo.getQuestionsNum())
+                .reviewRate(vo.getReviewRate())
+                .hardQuestions(vo.getHardQuestions())
+                .studyTime(vo.getStudyTime())
+                .build());
+
     }
 
     /**
@@ -57,15 +62,16 @@ public class LearningOverviewController {
      */
     @GetMapping("/get_study_dynamic")
     @GlobalInterception
-    public ResponseEntity<LearningDynamicVO> getStudyDynamic(){
+    public Response<LearningDynamicVO> getStudyDynamic(){
         String userId = UserContext.getUserId();
+        LearningDynamicVO result = null;
         try {
             log.info("用户获取学习动画，userId:{}", userId);
-            LearningDynamicVO result = service.getStudyDynamic(userId);
-            return ResponseEntity.ok(result);
+            result = service.getStudyDynamic(userId);
         } catch (Exception e) {
             log.error("getStudyDynamic error", e);
-            throw new RuntimeException(e);
+            return Response.CUSTOMIZE_ERROR(GET_STUDY_DYNAMIC_FAIL);
         }
+        return Response.SYSTEM_SUCCESS(result);
     }
 }

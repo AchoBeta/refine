@@ -21,6 +21,11 @@ public class MistakeQuestionEntity {
     private String userId;
 
     /**
+     * 错题ID
+     */
+    private String questionId;
+
+    /**
      * 错题内容
      */
     private String questionContent;

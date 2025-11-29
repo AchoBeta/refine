@@ -1,5 +1,6 @@
 package com.achobeta.domain.question.service.impl;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.question.adapter.port.AiGenerationService;
 import com.achobeta.domain.question.adapter.repository.IKnowledgeRepository;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
@@ -55,21 +56,29 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String knowledgePointName = knowledgeRepository.findKnowledgeNameById(knowledgeId);
 
         if (null == subject) {
-            throw new AppException("找不到题目所属科目");
+            throw new AppException("（ai出题）找不到题目所属科目,mistakeQuestionId" + mistakeQuestionId);
         }
         if (null == knowledgePointName) {
-            throw new AppException("找不到该题知识点名称");
+            throw new AppException("（ai出题）找不到该题知识点名称,mistakeQuestionId" + mistakeQuestionId);
         }
-        String toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
 
         // 调用外部接口生成新题目
-        QuestionResponseDTO question = aiGenerationService.Generation(toAi);
+        String toAi;
+        QuestionResponseDTO question;
+        if (subject.equals("未分类")) {
+            toAi = "你是一位专业出题老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
+            question = aiGenerationService.Generation(toAi);
+        } else {
+            toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
+            question = aiGenerationService.Generation(subject, toAi);
+        }
+
         if (null == question.getContent() || null == question.getAnswer()) {
             throw new AppException(GlobalServiceStatusCode.QUESTION_GENERATION_FAIL);
         }
 
         // 构建错题实体
-        String questionId = String.valueOf(mistakeQuestionId + System.currentTimeMillis());
+        String questionId = UUID.fastUUID().toString().substring(0, 19)+ System.currentTimeMillis();
 
         MistakeQuestionDTO dto = new MistakeQuestionDTO();
         dto.setUserId(userId);
@@ -104,6 +113,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
         mistakeRepository.save(MistakeQuestionEntity.builder()
                 .userId(userId)
+                .questionId(questionId)
                 .questionContent(value.getQuestionContent())
                 .subject(value.getSubject())
                 .knowledgePointId(value.getKnowledgePointId())
@@ -138,7 +148,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String correctAnswer = value.getAnswer();
 
         Integer auto = 0;    // 用户可选是否自动录入TODO
-        if (auto==1){
+        if (auto == 1) {
             autoRecord(userId, questionId, userAnswer, correctAnswer);
         }
 
@@ -146,11 +156,23 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String chat = "请根据题目:\"" + questionContent + "\"以及正确答案:\"" + correctAnswer + "\"，判断答案:\"" + correctAnswer + "\"是否正确，并给出解析。";
 
         // 将ai流式调用提交到自定义线程池
-        return Flux.defer(() -> aiGenerationService.aiJudgeStream(chat))
-                .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
-                .map(chunk -> ServerSentEvent.<String>builder()
-                        .data(chunk)
-                        .build());
+        String subject = value.getSubject();
+        if (subject.equals("未分类")) {
+            return Flux.defer(() -> aiGenerationService.aiJudgeStream(chat))
+                    .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
+                    .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
+                    .map(chunk -> ServerSentEvent.<String>builder()
+                            .data(chunk)
+                            .build());
+        } else {
+            return Flux.defer(() -> aiGenerationService.aiJudgeStream(subject, chat))
+                    .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
+                    .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
+                    .map(chunk -> ServerSentEvent.<String>builder()
+                            .data(chunk)
+                            .build());
+        }
+
     }
 
     private void autoRecord(String userId, String questionId, String answer, String correctAnswer) {
