@@ -1,7 +1,6 @@
 package com.achobeta.domain.keypoints_explanation.service.etendbiz;
 
 
-import cn.hutool.core.date.DateTime;
 import com.achobeta.domain.keypoints_explanation.adapter.repository.KeyPointsMapper;
 import com.achobeta.domain.keypoints_explanation.adapter.repository.SubjectTransportMappeer;
 import com.achobeta.domain.keypoints_explanation.model.valobj.*;
@@ -11,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -23,7 +20,6 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
 
     @Autowired
     private MindMapService mindMapService;
-
 
     /**
      * 获取子知识点
@@ -141,11 +137,6 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
         return new ToolTipVO(total, count, lastReviewTime);
     }
 
-    /**
-     * 获取知识点相关错误题与笔记
-     * @param knowledgeId
-     * @return
-     */
     @Override
     public RelateQuestionVO getRelatedWrongQuestions(String knowledgeId, String userId) {
         List<QuestionVO> qestions = keyPointsMapper.getRelatedQuestions(knowledgeId, userId);
@@ -154,44 +145,9 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
         return new RelateQuestionVO(qestions, note);
     }
 
-    /**
-     * 添加子知识点
-     */
     @Override
     public void addSonPoint(SonPointVO sonPointVOs, String userId, String parentId) {
         saveMindMapNode(userId, sonPointVOs, parentId);
-    }
-
-    /**
-     * 删除知识点
-     * @param knowledgeId
-     */
-    @Override
-    @Transactional
-    public void deleteKnowledgePoint(String knowledgeId, String userId) {
-        if(knowledgeId != null){
-            List<KeyPointsVO> knowledges = keyPointsMapper.getSonKeyPoints(knowledgeId, userId);
-            keyPointsMapper.deleteKnowledgePoint(knowledgeId, userId);
-            for (KeyPointsVO knowledge : knowledges) {
-                deleteKnowledgePoint(knowledge.getId(), userId);
-            }
-        }
-    }
-
-    @Override
-    public void undoDeleteKnowledgePoint(String knowledgeId, String userId) {
-        if(knowledgeId != null){
-            List<KeyPointsVO> knowledges = keyPointsMapper.getSonKeyPoints(knowledgeId, userId);
-            keyPointsMapper.undoDeleteKnowledgePoint(knowledgeId, userId);
-            for (KeyPointsVO knowledge : knowledges) {
-                undoDeleteKnowledgePoint(knowledge.getId(), userId);
-            }
-        }
-    }
-
-    @Override
-    public void deleteKnowledgeTure() {
-        keyPointsMapper.deleteKnowledgeTure();
     }
 
     private void saveMindMapNode(String userId, SonPointVO node, String parentId) {

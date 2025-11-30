@@ -12,15 +12,15 @@ import java.util.List;
 @Mapper
 public interface KeyPointsMapper {
     @Select("select knowledge_point_id as id, knowledge_point_name as keyPoints from knowledgePoint" +
-            " where user_id = #{userId} and parent_knowledge_point_id = #{knowledgeId} and status != -1")
+            " where user_id = #{userId} and parent_knowledge_point_id = #{knowledgeId}")
     List<KeyPointsVO> getSonKeyPoints(@Param("knowledgeId") String knowledgeId, @Param("userId") String userId);
 
     @Select("select knowledge_point_id as id, knowledge_point_name as keyPoints from knowledgePoint" +
-            " where user_id = #{userId} and parent_knowledge_point_id = #{subjectId} and status != -1 ")
+            " where user_id = #{userId} and parent_knowledge_point_id = #{subjectId} ")
     List<KeyPointsVO> getKeyPoints(int subjectId, String userId);
 
     @Select("select knowledge_desc from knowledgePoint" +
-            " where user_id = #{userId} and knowledge_point_id = #{knowledgeId}")
+            " where user_id = #{userId} and knowledge_point_id = #{knowledgeId} ")
     String getKnowledgedescById(String knowledgeId, String userId);
 
     @Select("select count(id) as updateCount, count(update_time >= now() - interval 7 day) as reviewCount from MistakeQuestion" +
@@ -62,14 +62,6 @@ public interface KeyPointsMapper {
             " values(#{node.pointId}, #{node.pointName}, #{node.pointDesc}, #{parentId}, #{userId})")
     void saveMindMapTree(String userId, SonPointVO node, String parentId);
 
-    @Select("update knowledgePoint set status = -1  where user_id = #{userId} and knowledge_point_id = #{knowledgeId}")
-    void deleteKnowledgePoint(String knowledgeId, String userId);
-
-    @Select("update knowledgePoint set status = 0  where user_id = #{userId} and knowledge_point_id = #{knowledgeId}")
-    void undoDeleteKnowledgePoint(String knowledgeId, String userId);
-
-    @Select("delete from knowledgePoint where status = -1")
-    void deleteKnowledgeTure();
     @Insert("insert into knowledgePoint(knowledge_point_id, knowledge_point_name, user_id)" +
             " values(#{knowledgePointId}, #{knowledgePointName}, #{userId})")
     void insertNewPoint4MistakeQuestion(String userId, String knowledgePointId, String knowledgePointName);

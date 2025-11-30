@@ -27,10 +27,4 @@ public interface IKeyPointsExplanationService {
     RelateQuestionVO getRelatedWrongQuestions(String knowledgeId, String userId);
 
     void addSonPoint(SonPointVO sonPointVOs, String userId, String parentId);
-
-    void deleteKnowledgePoint(String knowledgeId, String userId);
-
-    void undoDeleteKnowledgePoint(String knowledgeId, String userId);
-
-    void deleteKnowledgeTure();
 }

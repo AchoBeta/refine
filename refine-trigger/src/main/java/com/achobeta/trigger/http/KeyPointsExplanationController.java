@@ -1,10 +1,8 @@
 package com.achobeta.trigger.http;
 
 
-import cn.hutool.core.date.DateTime;
 import com.achobeta.api.dto.*;
 import com.achobeta.domain.IRedisService;
-import com.achobeta.domain.keypoints_explanation.adapter.repository.KeyPointsMapper;
 import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import com.achobeta.domain.keypoints_explanation.service.IKeyPointsExplanationService;
 import com.achobeta.types.Response;
@@ -15,18 +13,12 @@ import com.achobeta.types.enums.GlobalServiceStatusCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 
@@ -41,7 +33,6 @@ import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 @RequestMapping("/api/${app.config.api-version}/keypoints_explanation")
 public class KeyPointsExplanationController {
     private final IKeyPointsExplanationService keyPointsExplanationService;
-    private final Map<String, LocalDateTime> deleteList = new HashMap<>();
 
     /**
      * 根据学科获取中心知识点
@@ -286,52 +277,4 @@ public class KeyPointsExplanationController {
         return Response.SYSTEM_SUCCESS("添加成功");
     }
 
-    /**
-     * 删除知识点
-     */
-    @DeleteMapping("/{knowledgeId}/delete")
-    @GlobalInterception
-    public Response<String> deleteKnowledgePoint(@PathVariable String knowledgeId ) {
-        String userId = UserContext.getUserId();
-        try {
-            deleteList.put(knowledgeId, LocalDateTime.now());
-            keyPointsExplanationService.deleteKnowledgePoint(knowledgeId, userId);
-        } catch (Exception e) {
-            return Response.CUSTOMIZE_ERROR(DELETE_KNOWLEDGE_POINT_FAIL);
-        }
-        return Response.SYSTEM_SUCCESS("删除成功");
-    }
-
-    /**
-     * 撤销删除知识点
-     */
-    @PostMapping("/{knowledgeId}/undo-delete")
-    @GlobalInterception
-    public Response<String> undoDeleteKnowledgePoint(@PathVariable String knowledgeId ) {
-        String userId = UserContext.getUserId();
-        try {
-            if(LocalDateTime.now().isAfter(deleteList.get(knowledgeId).minusMinutes(30))){
-                deleteList.remove(knowledgeId);
-                keyPointsExplanationService.undoDeleteKnowledgePoint(knowledgeId, userId);
-            }else{
-                deleteList.remove(knowledgeId);
-                return Response.SYSTEM_SUCCESS("删除超过30mins,撤销删除失败");
-            }
-        } catch (Exception e) {
-            return Response.CUSTOMIZE_ERROR(UNDO_DELETE_KNOWLEDGE_POINT_FAIL);
-        }
-        return Response.SYSTEM_SUCCESS("撤销删除成功");
-    }
-
-    /**
-     * 定时任务：删除状态为“已删除”的知识点 status = -1
-     */
-    @Scheduled(cron = "0 0 3 * * *")
-    public void deleteKnowledgePoint() {
-        try {
-            keyPointsExplanationService.deleteKnowledgeTure();
-        }catch (Exception e) {
-            log.error("定时任务：删除状态为“已删除”的知识点 status = -1 失败");
-        }
-    }
 }

@@ -87,8 +87,6 @@ public enum GlobalServiceStatusCode {
     RENAME_NODE_FAIL(10018, "重命名节点失败,请稍后再试"),
     SHOW_TOOLTIP_FAIL(10019, "显示提示失败,请稍后再试"),
     ADD_SON_POINT_FAIL(10020, "添加子知识点失败,请稍后再试"),
-    DELETE_KNOWLEDGE_POINT_FAIL(10021, "删除知识点失败,请稍后再试"),
-    UNDO_DELETE_KNOWLEDGE_POINT_FAIL(10022, "撤销删除知识点失败,请稍后再试"),
     /* 错因管理相关状态码 11001-11100 */
     MISTAKE_REASON_SUCCESS(11001, "错因操作成功"),
     MISTAKE_REASON_TOGGLE_SUCCESS(11002, "错因状态切换成功"),
@@ -96,6 +94,7 @@ public enum GlobalServiceStatusCode {
     MISTAKE_REASON_GET_SUCCESS(11004, "错因信息获取成功"),
     STUDY_NOTE_SUBMIT_SUCCESS(11005, "错题笔记提交成功"),
     STUDY_NOTE_GET_SUCCESS(11006, "错题笔记获取成功"),
+
 
     MISTAKE_REASON_NOT_FOUND(11101, "未找到对应的错题记录"),
     MISTAKE_REASON_INVALID_PARAM(11102, "错因参数无效"),
