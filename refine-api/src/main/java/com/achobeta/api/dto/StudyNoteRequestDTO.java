@@ -15,12 +15,6 @@ import java.io.Serializable;
 public class StudyNoteRequestDTO implements Serializable {
 
     /**
-     * 用户ID
-     */
-    @NotBlank(message = "用户ID不能为空")
-    private String userId;
-
-    /**
      * 题目ID
      */
     @NotBlank(message = "题目ID不能为空")

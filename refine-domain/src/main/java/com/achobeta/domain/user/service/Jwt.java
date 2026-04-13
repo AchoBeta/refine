@@ -1,6 +1,5 @@
 package com.achobeta.domain.user.service;
 
-import java.util.Date;
 import java.util.Map;
 
 public interface Jwt {
@@ -17,6 +16,8 @@ public interface Jwt {
 
     void invalidateRefreshToken(String refreshToken);
 
-    Date getRefreshTokenIat(String refreshToken);
+    Long getRefreshTokenIat(String refreshToken);
+
+    String getRefreshToken4UserId(String userId);
 
 }

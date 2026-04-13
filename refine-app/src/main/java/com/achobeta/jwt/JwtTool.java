@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.achobeta.types.common.Constants.USER_REFRESH_TOKEN_KEY;
+import static com.achobeta.types.common.Constants.USER_TOKEN_ID_KEY;
 
 @Component
 @EnableConfigurationProperties(JwtProperties.class)
@@ -79,6 +80,11 @@ public class JwtTool implements Jwt {
                 userId,
                 jwtProperties.getRefreshTokenTtl().toMillis()
         );
+        redis.setValue(
+                USER_TOKEN_ID_KEY + userId,
+                refreshToken,
+                jwtProperties.getRefreshTokenTtl().toMillis()
+        );
         return refreshToken;
     }
 
@@ -86,7 +92,7 @@ public class JwtTool implements Jwt {
      * 通用Token生成方法
      */
     private String createToken(Map<String, Object> claims, Duration ttl) {
-        claims.put("iat", new Date()); // 添加签发时间
+        claims.put("iat", System.currentTimeMillis()/1000); // 添加签发时间,毫秒值
         return JWT.create()
                 .addPayloads(claims) // 设置载荷
                 .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis())) // 过期时间
@@ -139,7 +145,7 @@ public class JwtTool implements Jwt {
             log.debug("Token有效：{}", jwt);
         } catch (ValidateException e) {
             // 细分异常：过期/签名无效
-            if (e.getMessage().contains("expired")) {
+            if (e.getMessage().contains("is before now:")) {
                 throw new UnauthorizedException(expectedType + "-token已过期", e);
             } else {
                 throw new UnauthorizedException(expectedType + "-token签名无效", e);
@@ -151,7 +157,7 @@ public class JwtTool implements Jwt {
         // 4. 校验Token类型
         String actualType = Convert.toStr(jwt.getPayload("type"));
         if (!StrUtil.equals(actualType, expectedType)) {
-            throw new UnauthorizedException("无效的" + expectedType + "-token：类型错误");
+            throw new UnauthorizedException("无效的" + expectedType + "-token：token类型错误");
         }
 
         // 5. 提取用户ID
@@ -167,7 +173,7 @@ public class JwtTool implements Jwt {
         }
 
         // 7. 提取iat
-        Date iat = Convert.toDate(jwt.getPayload("iat"));
+        Long iat = Convert.toLong(jwt.getPayload("iat"));
         if (iat == null) {
             throw new UnauthorizedException("无效的" + expectedType + "-token：缺失签发时间");
         }
@@ -190,7 +196,7 @@ public class JwtTool implements Jwt {
         String newRefreshToken = refreshToken;
         try {
             // 计算 refresh-token 剩余有效期
-            long remainingTime = jwtProperties.getRefreshTokenTtl().toMillis() - (System.currentTimeMillis() - getRefreshTokenIat(refreshToken).getTime());
+            long remainingTime = jwtProperties.getRefreshTokenTtl().toMillis() - (System.currentTimeMillis() - getRefreshTokenIat(refreshToken)*1000);
             // 剩余有效期小于一半时，生成新的 refresh-token
             if (remainingTime > 0 && remainingTime < (jwtProperties.getRefreshTokenTtl().toMillis() / 2)) {
                 // 同时会自动更新 Redis 的refresh-token
@@ -232,8 +238,13 @@ public class JwtTool implements Jwt {
     /**
      * 提取refresh-token中的iat值
      */
-    public Date getRefreshTokenIat(String refreshToken) {
+    public Long getRefreshTokenIat(String refreshToken) {
         return parseToken(refreshToken, "refresh").getIat();
+    }
+
+
+    public String getRefreshToken4UserId(String userId) {
+        return redis.getValue(USER_TOKEN_ID_KEY + userId);
     }
 
 
@@ -245,7 +256,7 @@ public class JwtTool implements Jwt {
     private static class TokenPayload {
         private final String userId;
         private final String jti;
-        private final Date iat;
+        private final Long iat;
 
     }
 }

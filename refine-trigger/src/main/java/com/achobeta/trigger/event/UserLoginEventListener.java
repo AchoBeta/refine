@@ -1,5 +1,6 @@
 package com.achobeta.trigger.event;
 
+import com.achobeta.domain.overview.service.extendbiz.UserOverviewService;
 import com.achobeta.domain.rag.service.impl.LearningAnalysisService;
 import com.achobeta.domain.rag.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.user.event.UserLoginEvent;
@@ -32,7 +33,7 @@ public class UserLoginEventListener {
             log.info("检测到用户登录，开始分析学习动态，userId:{}", userId);
 
             // 异步分析用户学习动态
-            List<LearningDynamicVO> dynamics = learningAnalysisService.onUserLogin(userId);
+            learningAnalysisService.onUserLogin(userId);
         } catch (Exception e) {
             log.error("处理用户登录事件失败", e);
         }

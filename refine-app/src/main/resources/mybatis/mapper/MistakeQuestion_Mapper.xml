@@ -28,9 +28,9 @@
     </sql>
 
     <insert id="insert" parameterType="com.achobeta.infrastructure.dao.po.MistakeQuestion" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO mistake_question (
+        INSERT INTO MistakeQuestion (
             user_id, question_id, question_content, subject, is_careless, is_unfamiliar, is_calculate_err,
-            is_time_shortage, other_reason, knowledge_point_id, study_note, question_status,
+            is_time_shortage, other_reason, other_reason_flag, knowledge_point_id, study_note, question_status,
             create_time, update_time
         ) VALUES (
             #{userId,jdbcType=VARCHAR},
@@ -54,14 +54,14 @@
     <select id="selectByQuestionId" parameterType="java.lang.String" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM mistake_question
+        FROM MistakeQuestion
         WHERE question_id = #{questionId,jdbcType=VARCHAR}
     </select>
 
     <select id="selectByUserId" parameterType="java.lang.String" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM mistake_question
+        FROM MistakeQuestion
         WHERE user_id = #{userId,jdbcType=VARCHAR}
         ORDER BY create_time DESC
     </select>
@@ -69,12 +69,12 @@
     <select id="selectByUserIdAndQuestionId" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM mistake_question
+        FROM MistakeQuestion
         WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
     </select>
 
     <update id="updateMistakeReasons" parameterType="com.achobeta.infrastructure.dao.po.MistakeQuestion">
-        UPDATE mistake_question
+        UPDATE MistakeQuestion
         SET
             is_careless = #{isCareless,jdbcType=INTEGER},
             is_unfamiliar = #{isUnfamiliar,jdbcType=INTEGER},
@@ -87,14 +87,14 @@
     </update>
 
     <update id="updateOtherReasonText">
-        UPDATE mistake_question
+        UPDATE MistakeQuestion
         SET other_reason = #{otherReasonText,jdbcType=VARCHAR},
             update_time = NOW()
         WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
     </update>
 
     <update id="updateStudyNote">
-        UPDATE mistake_question
+        UPDATE MistakeQuestion
         SET study_note = #{studyNote,jdbcType=LONGVARCHAR},
             update_time = NOW()
         WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}

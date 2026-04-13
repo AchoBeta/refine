@@ -4,6 +4,7 @@ import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.infrastructure.dao.UserAccountMapper;
 import com.achobeta.domain.IRedisService;
+import com.achobeta.infrastructure.dao.UserDataMapper;
 import com.achobeta.types.support.id.SnowflakeIdWorker;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class UserRepository implements IUserRepository {
     private IRedisService redis;
 
     private final UserAccountMapper userAccountMapper;
+    private final UserDataMapper userDataMapper;
 
     /**
      * 这里简化了，分布式部署的话要从配置文件读入workerId(每台机器设置唯一不同)
@@ -48,6 +50,7 @@ public class UserRepository implements IUserRepository {
         // 生成唯一用户ID
         user.setUserId(INSTANCE.nextIdStr());
         userAccountMapper.insert(user);
+        userDataMapper.insert(user.getUserId());
     }
 
     @Override

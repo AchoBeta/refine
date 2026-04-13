@@ -1,4 +1,4 @@
-package com.achobeta.infrastructure.dao;
+package com.achobeta.infrastructure.dao.vector;
 
 import com.achobeta.infrastructure.dao.po.LearningVector;
 import com.achobeta.domain.rag.model.valobj.LearningInsightVO;

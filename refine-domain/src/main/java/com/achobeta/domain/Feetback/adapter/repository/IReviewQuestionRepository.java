@@ -13,8 +13,8 @@ import java.util.List;
 public interface IReviewQuestionRepository {
 
 
-    @Select("SELECT COUNT(1) FROM MistakeQuestion " +
-            "WHERE user_id = #{userId} AND date_sub(now(), interval 7 day) >= update_time")
+    @Select("SELECT COUNT(id) FROM MistakeQuestion " +
+            "WHERE user_id = #{userId} AND now()- interval 7 day >= update_time")
     int queryReviewQuestions(@Param("userId") String userId);
 
     void deleteBatch(@Param("userId") String userId, @Param("questionIds") List<Integer> questionIds);

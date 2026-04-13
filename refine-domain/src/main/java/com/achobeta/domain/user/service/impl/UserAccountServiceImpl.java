@@ -7,6 +7,7 @@ import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;
 import com.achobeta.domain.user.service.Jwt;
+import com.achobeta.types.Response;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.util.StringTools;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 用户领域服务实现
@@ -35,7 +37,6 @@ public class UserAccountServiceImpl implements IUserAccountService {
     
     private final ApplicationEventPublisher eventPublisher;
 
-
     /**
      * 用户注册（添加验证码验证逻辑）
      *
@@ -47,17 +48,14 @@ public class UserAccountServiceImpl implements IUserAccountService {
      * @throws AppException 邮箱已注册、验证码无效等异常
      */
     @Override
-    public void register(String email, String password, String userName, String checkCode) {
+    public Response register(String email, String password, String userName, String checkCode) {
 
-        if (!StringTools.isEmail(email)) {
-            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_FORMAT_ERROR);
-        }
         // 先验证验证码（核心新增逻辑：调用验证码服务验证）
         emailVerificationService.verifyCode(email, checkCode);
 
         // 校验邮箱是否已存在
         if (null != userRepository.findByAccount(email)) {
-            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_ALREADY_EXIST);
+            return Response.CUSTOMIZE_MSG_ERROR(GlobalServiceStatusCode.USER_EMAIL_ALREADY_EXIST,null);
         }
 
         // 创建用户实体
@@ -71,6 +69,7 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
         // 5. 保存用户
         userRepository.save(user);
+        return Response.SYSTEM_SUCCESS();
     }
 
     /**
@@ -142,6 +141,7 @@ public class UserAccountServiceImpl implements IUserAccountService {
         }
         user.encryptPassword(newPassword);
         userRepository.updateByUserAccount(user, user.getUserAccount());
+        logout(jwt.getRefreshToken4UserId(userId));
     }
 
     @Override

@@ -2,21 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.achobeta.domain.Feetback.adapter.repository.IReviewQuestionRepository">
     <delete id="deleteBatch">
-        delete from MistakeQuestion where user_id = #{userId} and id in
+        delete from MistakeQuestion where user_id = #{userId} and question_id in
         <foreach item="questionId" index="index" collection="questionIds"
                  open="(" separator="," close=")">
             #{questionId}
         </foreach>
     </delete>
     <select id="countBySubject" resultType="com.achobeta.domain.Feetback.model.valobj.CountByTypeVO">
-        select subject as name, count(1) as count
+        select subject as name, count(id) as count
         from MistakeQuestion
         where user_id = #{userId} and question_status = 0
         group by subject
     </select>
     <select id="countByKnowledge" resultType="com.achobeta.domain.Feetback.model.valobj.CountByTypeVO">
-        select k.knowledge_desc as name, count(1) as count
-        from MistakeQuestion m join  knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id
+        select k.knowledge_desc as name, count(m.id) as count
+        from MistakeQuestion m join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id
         where m.user_id = #{userId} and question_status = 0
         group by m.knowledge_point_id
     </select>

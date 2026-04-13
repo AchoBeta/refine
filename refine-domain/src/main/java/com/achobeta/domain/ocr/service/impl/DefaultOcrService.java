@@ -98,9 +98,23 @@ public class DefaultOcrService implements IOcrService {
             throw new AppException("文件识别失败，请稍后重试或联系客服");
         }
 
+        // 记录OCR识别的原始文本
+        log.info("OCR识别原始文本: {}", recognizedText);
+        
         // 使用 AI 模型尝试提取第一个问题
-        recognizedText = aiService.extractTheFirstQuestion(recognizedText);
+        String extractedText = aiService.extractTheFirstQuestion(recognizedText);
+        log.info("AI提取后的文本: {}", extractedText);
+        
+        // 检查AI提取结果是否为空
+        if (extractedText == null || extractedText.trim().isEmpty()) {
+            log.warn("AI提取的题目内容为空，使用原始OCR文本");
+            recognizedText = recognizedText;
+        } else {
+            recognizedText = extractedText;
+        }
+        
         String uuid = UUID.fastUUID().toString();
+        log.info("最终题目内容: {}", recognizedText);
 
         // 创建问题实体
         QuestionEntity questionEntity = new QuestionEntity();

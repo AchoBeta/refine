@@ -27,7 +27,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public List<KeyPointsVO> getSonKeyPoints(int knowledgeId, String userId) {
+    public List<KeyPointsVO> getSonKeyPoints(String knowledgeId, String userId) {
         List<KeyPointsVO> keyPointsVOList = keyPointsMapper.getSonKeyPoints(knowledgeId, userId);
         return keyPointsVOList == null ? new ArrayList<>() : keyPointsVOList;
     }
@@ -49,7 +49,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * 获取知识点详情
      */
     @Override
-    public String getKnowledgedescById(int knowledgeId, String userId) {
+    public String getKnowledgedescById(String knowledgeId, String userId) {
         return keyPointsMapper.getKnowledgedescById(knowledgeId, userId);
     }
 
@@ -59,7 +59,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public WrongQuestionVO getRelatedWrongQuestionsStatistic(int knowledgeId, String userId) {
+    public WrongQuestionVO getRelatedWrongQuestionsStatistic(String knowledgeId, String userId) {
         WrongQuestionVO wrongQuestionVO = keyPointsMapper.getRelatedWrongQuecstions(knowledgeId, userId);
         return wrongQuestionVO == null ? new WrongQuestionVO() : wrongQuestionVO;
     }
@@ -70,7 +70,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public List<KeyPointsVO> getRelatedKnowledgePoints(int knowledgeId, String userId) {
+    public List<KeyPointsVO> getRelatedKnowledgePoints(String knowledgeId, String userId) {
         List<KeyPointsVO> keyPointsVOList = new ArrayList<>();
 
         // 获取父知识点
@@ -93,7 +93,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public void savedNote(String note, int knowledgeId, String userId) {
+    public void savedNote(String note, String knowledgeId, String userId) {
         keyPointsMapper.savedNote(note, knowledgeId, userId);
     }
 
@@ -103,7 +103,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public void markAsMastered(int knowledgeId, String userId) {
+    public void markAsMastered(String knowledgeId, String userId) {
         keyPointsMapper.markAsMastered(knowledgeId, userId);
     }
 
@@ -114,7 +114,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public void renameNode(int knowledgeId, String newName, String userId) {
+    public void renameNode(String knowledgeId, String newName, String userId) {
         keyPointsMapper.renameNode(knowledgeId, newName, userId);
     }
 
@@ -124,7 +124,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      * @return
      */
     @Override
-    public ToolTipVO gettooltipById(int knowledgeId, String userId) {
+    public ToolTipVO gettooltipById(String knowledgeId, String userId) {
         // 获取总错题数
         int total = keyPointsMapper.getTotalById(knowledgeId, userId);
 
@@ -138,7 +138,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
     }
 
     @Override
-    public RelateQuestionVO getRelatedWrongQuestions(int knowledgeId, String userId) {
+    public RelateQuestionVO getRelatedWrongQuestions(String knowledgeId, String userId) {
         List<QuestionVO> qestions = keyPointsMapper.getRelatedQuestions(knowledgeId, userId);
         String note = keyPointsMapper.getNoteById(knowledgeId, userId);
 

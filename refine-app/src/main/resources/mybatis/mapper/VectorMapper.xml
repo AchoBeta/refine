@@ -1,38 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.achobeta.infrastructure.dao.IVectorDao">
+<mapper namespace="com.achobeta.infrastructure.dao.vector.IVectorDao">
 
-    <!-- 插入学习向量 -->
+    <!-- 插入学习向量 - 暂时禁用embedding和metadata字段 -->
     <insert id="insertLearningVector" parameterType="com.achobeta.infrastructure.dao.po.LearningVector">
         INSERT INTO user_learning_vectors 
-        (user_id, question_id, action_type, question_content, subject, knowledge_point_id, embedding, metadata)
+        (user_id, question_id, action_type, question_content, subject, knowledge_point_id)
         VALUES 
-        (#{userId}, #{questionId}, #{actionType}, #{questionContent}, #{subject}, #{knowledgePointId}, 
-         #{embedding}::vector, #{metadata}::jsonb)
+        (#{userId}, #{questionId}, #{actionType}, #{questionContent}, #{subject}, #{knowledgePointId})
     </insert>
 
-    <!-- 向量相似度搜索 -->
+    <!-- 向量相似度搜索 - 暂时禁用向量搜索和metadata字段 -->
     <select id="searchSimilarVectors" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
         SELECT 
             id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
-            embedding, metadata, created_at, updated_at,
-            1 - (embedding <> #{queryVector}::vector) as similarity
+            created_at, updated_at,
+            0.5 as similarity
         FROM user_learning_vectors 
         WHERE user_id = #{userId}
-        ORDER BY embedding <> #{queryVector}::vector
+        ORDER BY created_at DESC
         LIMIT #{limit}
     </select>
 
-    <!-- 根据行为类型获取用户向量 -->
+    <!-- 根据行为类型获取用户向量 - 暂时排除embedding和metadata字段 -->
     <select id="getUserVectorsByActionType" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
-        SELECT * FROM user_learning_vectors 
+        SELECT id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
+               created_at, updated_at
+        FROM user_learning_vectors 
         WHERE user_id = #{userId} AND action_type = #{actionType}
         ORDER BY created_at DESC
     </select>
 
-    <!-- 获取用户所有向量 -->
+    <!-- 获取用户所有向量 - 暂时排除embedding和metadata字段 -->
     <select id="getUserAllVectors" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
-        SELECT * FROM user_learning_vectors 
+        SELECT id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
+               created_at, updated_at
+        FROM user_learning_vectors 
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
     </select>
@@ -56,9 +59,11 @@
         AND is_active = true
         ORDER BY created_at DESC
     </select>
-    <!-- 获取用户最近N天的学习向量数据 -->
+    <!-- 获取用户最近N天的学习向量数据 - 暂时排除embedding和metadata字段 -->
     <select id="getUserRecentLearningData" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
-        SELECT * FROM user_learning_vectors 
+        SELECT id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
+               created_at, updated_at
+        FROM user_learning_vectors 
         WHERE user_id = #{userId}
         AND created_at >= NOW() - INTERVAL #{days} DAY
         ORDER BY created_at DESC

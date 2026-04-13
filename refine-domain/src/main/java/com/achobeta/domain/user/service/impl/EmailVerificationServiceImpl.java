@@ -47,7 +47,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
     public void sendEmailCode(String userEmail) {
         // 校验邮箱格式
         if (!StringTools.isEmail(userEmail)) {
-            throw new AppException(GlobalServiceStatusCode.USER_CAPTCHA_CODE_ERROR);
+            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_FORMAT_ERROR);
         }
 
         // 检查发送频率
@@ -102,7 +102,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
 
         // 3. 验证验证码
         if (null == cachedCode) {
-            throw new AppException("验证码已过期，请重新获取");
+            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_VERIFY_CODE_ERROR);
         }
         if (!cachedCode.equals(checkCode)) {
             throw new AppException(GlobalServiceStatusCode.USER_CAPTCHA_CODE_ERROR);

@@ -43,10 +43,10 @@ public class GlobalOperationAspect {
             checkLogin();
         } catch (UnauthorizedException e) {
             log.error("登录验证失败：{}", e.getMessage());
-            throw new AppException(e.getCode(),e.getMessage());
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (AppException e) {
             log.error("全局拦截异常", e);
-            throw new AppException(e.getMessage());
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Throwable e) {
             log.error("全局拦截异常", e);
             throw new AppException(GlobalServiceStatusCode.PARAM_FAILED_VALIDATE);
@@ -74,7 +74,7 @@ public class GlobalOperationAspect {
         // 从请求头获取token
         String token = request.getHeader("access-token");
         if (StringTools.isEmpty(token)) {
-            throw new AppException(GlobalServiceStatusCode.UNAUTHORIZED); // token为空，未登录
+            throw new AppException(401, "token为空"); // token为空，未登录
         }
 
         // 先JWT技术验证，验签名、过期时间

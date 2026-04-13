@@ -31,4 +31,9 @@ public class QuestionEntity implements Serializable {
      */
     private String questionText;
 
+    /**
+     * 知识点名称
+     */
+    private String knowledgePointId;
+
 }

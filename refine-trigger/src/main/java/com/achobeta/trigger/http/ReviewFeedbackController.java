@@ -8,15 +8,12 @@ import com.achobeta.api.dto.StatsDTO;
 import com.achobeta.domain.Feetback.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.Feetback.model.valobj.*;
 import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
-import com.achobeta.domain.IRedisService;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
-import com.achobeta.types.common.Constants;
 import com.achobeta.types.common.UserContext;
 import com.achobeta.types.enums.TimeRange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -26,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 
 /**
  * 待复习题目反馈接口
@@ -50,19 +49,20 @@ public class ReviewFeedbackController {
     @GlobalInterception
     public Response<OverdueReviewDTO> getOverdueReviewCount() {
         String userId = UserContext.getUserId();
+        OverdueCountVO overdueCountVO = null;
         try{
             log.info("用户获取待复习题目数量开始，userId:{}", userId);
-            OverdueCountVO overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
+            overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
             log.info("用户获取待复习题目数量结束，userId:{} count:{}", userId, overdueCountVO.getCount());
-
-            return Response.SYSTEM_SUCCESS(OverdueReviewDTO.builder()
-                    .count(overdueCountVO.getCount())
-                    .description(overdueCountVO.getDescription())
-                    .build());
         }catch (Exception e){
             log.error("用户获取待复习题目数量失败！userId:{}", userId, e);
-            return Response.SERVICE_ERROR(e.getMessage());
+            return Response.CUSTOMIZE_ERROR(GET_OVERDUE_REVIEW_COUNT_FAIL);
         }
+        return Response.SYSTEM_SUCCESS(OverdueReviewDTO.builder()
+                .count(overdueCountVO.getCount())
+                .description(overdueCountVO.getDescription())
+                .build());
+
     }
 
     /**
@@ -72,27 +72,30 @@ public class ReviewFeedbackController {
     @GlobalInterception
     public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(){
         String userId = UserContext.getUserId();
+        List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = null;
         try{
             log.info("用户获取近期出错最多的知识点，userId:{}", userId);
-            List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
-            List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
-                    .map(trickyKnowledgePointVO -> {
-                        if (trickyKnowledgePointVO == null) {
-                            return TrickyKnowledgePointDTO.builder()
-                                    .knowledgeId("")
-                                    .knowledgeName("未知")
-                                    .build();
-                        }
-                        return TrickyKnowledgePointDTO.builder()
-                                .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
-                                .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
-                                .build();
-                    }).toList();
-            return Response.SYSTEM_SUCCESS(trickyKnowledgePointDTOS);
+            trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
         }catch (Exception e){
             log.error("用户获取近期出错最多的知识点失败！userId:{}", userId, e);
-            return Response.SERVICE_ERROR(e.getMessage());
+            return Response.CUSTOMIZE_ERROR(GET_TRICKY_KNOWLEDGE_POINT_FAIL);
         }
+
+        List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
+                .map(trickyKnowledgePointVO -> {
+                    if (trickyKnowledgePointVO == null) {
+                        return TrickyKnowledgePointDTO.builder()
+                                .knowledgeId("")
+                                .knowledgeName("未知")
+                                .build();
+                    }
+                    return TrickyKnowledgePointDTO.builder()
+                            .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
+                            .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
+                            .build();
+                }).toList();
+        return Response.SYSTEM_SUCCESS(trickyKnowledgePointDTOS);
+
     }
 
     /**
@@ -100,7 +103,7 @@ public class ReviewFeedbackController {
      */
     @GetMapping("/list")
     @GlobalInterception
-    public ResponseEntity<?> list(
+    public Response<?> list(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> subject,
             @RequestParam(required = false) List<String> errorType,
@@ -109,6 +112,7 @@ public class ReviewFeedbackController {
             @RequestParam(defaultValue = "10") int size
     ) {
         String userId = UserContext.getUserId();
+        Page<MistakeQuestionEntity> result = null;
         try {
             MistakeQueryParamsVO params = new MistakeQueryParamsVO();
             params.setUserId(userId);
@@ -126,13 +130,12 @@ public class ReviewFeedbackController {
             params.setSize(size);
 
             log.info("用户筛选获取待复习题目列表开始，userId:{}", userId);
-            Page<MistakeQuestionEntity> result = reviewFeedbackService.searchAndFilter(params);
-            return ResponseEntity.ok(result);
+            result = reviewFeedbackService.searchAndFilter(params);
         } catch (IllegalArgumentException e) {
             log.error("用户筛选获取待复习题目列表失败！userId:{}", userId, e);
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "请求参数无效: " + e.getMessage()));
+            return Response.CUSTOMIZE_ERROR(GET_REVIEW_QUESTION_LIST_FAIL);
         }
+        return Response.SYSTEM_SUCCESS(result);
     }
 
     /**
@@ -140,16 +143,16 @@ public class ReviewFeedbackController {
      */
     @DeleteMapping("/deleteBatch")
     @GlobalInterception
-    public ResponseEntity<String> deleteBatch(@RequestParam List<Integer> questionIds) {
+    public Response<String> deleteBatch(@RequestParam List<Integer> questionIds) {
         String userId = UserContext.getUserId();
         try {
             log.info("用户删除待复习题目开始，userId:{}", userId);
             reviewFeedbackService.deleteBatch(userId, questionIds);
-            return ResponseEntity.status(200).body("删除成功");
         } catch (Exception e) {
             log.error("用户删除待复习题目失败！userId:{}", userId, e);
-            return ResponseEntity.status(500).body("删除失败");
+            return Response.CUSTOMIZE_ERROR(DELETE_REVIEW_QUESTION_FAIL);
         }
+        return Response.SYSTEM_SUCCESS();
     }
 
     /**
@@ -157,55 +160,56 @@ public class ReviewFeedbackController {
      */
     @GetMapping("/statistics")
     @GlobalInterception
-    public ResponseEntity<StatsDTO> getStatistics() {
+    public Response<StatsDTO> getStatistics() {
         String userId = UserContext.getUserId();
+        StatsVO statsVO = null;
         try {
             log.info("获取待复习题目统计信息开始");
-            StatsVO statsVO = reviewFeedbackService.getStatistics(userId);
-            List<ReviewTrendDTO> reviewTrendDTOS = new ArrayList<>();
-            if(statsVO.getReviewTrend() == null || statsVO.getReviewTrend().isEmpty()){
-                reviewTrendDTOS.add(ReviewTrendDTO.builder()
-                        .month("0")
-                        .total(0)
-                        .reviewed(0)
-                        .completionRate(0.0)
-                        .build());
-            }else{
-                reviewTrendDTOS = statsVO.getReviewTrend().stream().map(reviewTrendVO -> {
-                    if(reviewTrendVO == null || reviewTrendVO.getTotal() == 0){
-                        return ReviewTrendDTO.builder()
-                                .month(reviewTrendVO.getMonth())
-                                .total(0)
-                                .reviewed(0)
-                                .completionRate(0.0)
-                                .build();
-                    }
-                    return ReviewTrendDTO.builder()
-                            .month(reviewTrendVO.getMonth())
-                            .total(reviewTrendVO.getTotal())
-                            .reviewed(reviewTrendVO.getReviewed())
-                            .completionRate(reviewTrendVO.getReviewed()*1.0/reviewTrendVO.getTotal())
-                            .build();
-                }).toList();
-            }
-
-            StatsDTO statsDTO = StatsDTO.builder()
-                    .subjectDistribution(statsVO.getSubjectDistribution().stream().map(count -> {
-                        Map<String, Integer> map = new HashMap<>();
-                        map.put(count.getName(), count.getCount());
-                        return map;
-                    }).collect(Collectors.toList()))
-                    .knowledgeDistribution(statsVO.getKnowledgeDistribution().stream().map(count -> {
-                        Map<String, Integer> map = new HashMap<>();
-                        map.put(count.getName(), count.getCount());
-                        return map;
-                    }).collect(Collectors.toList()))
-                    .reviewTrend(reviewTrendDTOS).build();
-            return ResponseEntity.ok(statsDTO);
+            statsVO = reviewFeedbackService.getStatistics(userId);
         } catch (Exception e) {
             log.error("获取待复习题目统计信息失败！", e);
-            throw new RuntimeException(e);
+            return Response.CUSTOMIZE_ERROR(GET_STATISTICS_FAIL);
         }
+        List<ReviewTrendDTO> reviewTrendDTOS = new ArrayList<>();
+        if(statsVO.getReviewTrend() == null || statsVO.getReviewTrend().isEmpty()){
+            reviewTrendDTOS.add(ReviewTrendDTO.builder()
+                    .month("0")
+                    .total(0)
+                    .reviewed(0)
+                    .completionRate(0.0)
+                    .build());
+        }else{
+            reviewTrendDTOS = statsVO.getReviewTrend().stream().map(reviewTrendVO -> {
+                if(reviewTrendVO == null || reviewTrendVO.getTotal() == 0){
+                    return ReviewTrendDTO.builder()
+                            .month(reviewTrendVO.getMonth())
+                            .total(0)
+                            .reviewed(0)
+                            .completionRate(0.0)
+                            .build();
+                }
+                return ReviewTrendDTO.builder()
+                        .month(reviewTrendVO.getMonth())
+                        .total(reviewTrendVO.getTotal())
+                        .reviewed(reviewTrendVO.getReviewed())
+                        .completionRate(reviewTrendVO.getReviewed()*1.0/reviewTrendVO.getTotal())
+                        .build();
+            }).toList();
+        }
+
+        StatsDTO statsDTO = StatsDTO.builder()
+                .subjectDistribution(statsVO.getSubjectDistribution().stream().map(count -> {
+                    Map<String, Integer> map = new HashMap<>();
+                    map.put(count.getName(), count.getCount());
+                    return map;
+                }).collect(Collectors.toList()))
+                .knowledgeDistribution(statsVO.getKnowledgeDistribution().stream().map(count -> {
+                    Map<String, Integer> map = new HashMap<>();
+                    map.put(count.getName(), count.getCount());
+                    return map;
+                }).collect(Collectors.toList()))
+                .reviewTrend(reviewTrendDTOS).build();
+        return Response.SYSTEM_SUCCESS(statsDTO);
     }
 
 }

@@ -3,17 +3,22 @@ package com.achobeta.config;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
+import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
-import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
+import dev.langchain4j.rag.query.Query;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
+import dev.langchain4j.store.embedding.filter.Filter;
+import dev.langchain4j.store.embedding.filter.MetadataFilterBuilder;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -101,13 +106,43 @@ public class RagConfig {
         }
 
         // 自定义内容加载器
-        EmbeddingStoreContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
-                .embeddingStore(embeddingStore)
-                .embeddingModel(qwenEmbeddingModel)
-                .maxResults(5) // 最多返回5条结果
-                .minScore(0.75) // 过滤掉分数小于0.75的结果
-                .build();
-        return retriever;
+        return new ContentRetriever() {
+            @Override
+            public List<Content> retrieve(Query query) {
+                // 1. 从查询元数据中动态提取业务传入的学科（target）
+                Object obj = query.metadata().invocationContext().chatMemoryId();
+                if (null == obj) {
+                    log.warn("RAG检索 - 未传递 file_name 筛选条件，返回空结果");
+                    return List.of();
+                }
+                String target = String.valueOf(obj);
+                log.info("RAG检索 - 动态过滤 file_name（模糊匹配）: {}", target);
+
+                // 2. 生成查询向量
+                Embedding embeddedQuery = qwenEmbeddingModel.embed(query.text()).content();
+
+                // 3. 用自定义的Filter构建动态过滤条件
+                //Filter filter = MetadataFilterBuilder.metadataKey("subject").isEqualTo(subject);
+
+                //模糊匹配，自定义的Filter构建动态过滤条件
+                Filter filter = MetadataFilterBuilder.metadataKey("file_name").containsString(target);
+
+                // 4. 执行带动态过滤的检索
+                EmbeddingSearchRequest searchRequest = EmbeddingSearchRequest.builder()
+                        .queryEmbedding(embeddedQuery)
+                        .maxResults(5) // 最多返回5条
+                        .minScore(0.75) // 相关度阈值
+                        .filter(filter) // 动态过滤条件
+                        .build();
+
+                EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(searchRequest);
+
+                // 5. 转换结果为Content列表
+                return searchResult.matches().stream()
+                        .map(match -> Content.from(match.embedded()))
+                        .collect(Collectors.toList());
+            }
+        };
     }
 
     private void truncateEmbeddingTable() {

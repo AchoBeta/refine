@@ -83,10 +83,14 @@ public class BaiduOcrRPC {
      * - raw: 第三方原始返回字符串
      */
     public String recognizeImage(byte[] imageBytes) {
+        log.info("百度OCR调用开始，enabled: {}, imageBytes长度: {}", enabled, imageBytes != null ? imageBytes.length : 0);
+        
         if (!enabled) {
+            log.warn("百度OCR未启用");
             return toJson(skeletonJson("Baidu OCR disabled", null, ""));
         }
         if (isBlank(apiKey) || isBlank(secretKey)) {
+            log.error("百度OCR API Key或Secret Key为空");
             return toJson(skeletonJson("Baidu OCR call failed: API Key/Secret Key is empty", null, ""));
         }
         try {
@@ -125,10 +129,14 @@ public class BaiduOcrRPC {
 
             // 解析百度OCR响应，提取识别出的文本内容
             String extractedText = extractTextFromBaiduResponse(raw);
+            log.info("百度OCR识别结果: {}", extractedText);
 
             Map<String, Object> data = skeletonJson(extractedText, raw, "v1");
-            return toJson(data);
+            String result = toJson(data);
+            log.info("百度OCR最终返回: {}", result);
+            return result;
         } catch (Exception e) {
+            log.error("百度OCR调用异常", e);
             return toJson(skeletonJson("Baidu OCR call failed: " + e.getMessage(), null, ""));
         }
 

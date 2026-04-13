@@ -6,6 +6,7 @@ import com.achobeta.infrastructure.gateway.OcrRPC;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  * @Desc : OCR 适配器
  * @Time : 2025/10/31 17:02
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OcrPort implements IOcrPort {
@@ -36,12 +38,17 @@ public class OcrPort implements IOcrPort {
         String json = "baidu".equalsIgnoreCase(ocrProvider) 
                 ? baiduOcrRPC.recognizeImage(imageBytes)
                 : ocrRPC.recognizeImage(imageBytes);
+        
+        log.info("OCR服务提供商: {}, 返回JSON: {}", ocrProvider, json);
                 
         try {
             JsonNode node = objectMapper.readTree(json);
             JsonNode textNode = node.get("text");
-            return textNode != null ? textNode.asText("") : "";
+            String text = textNode != null ? textNode.asText("") : "";
+            log.info("OCR识别文本: {}", text);
+            return text;
         } catch (Exception e) {
+            log.error("解析OCR返回JSON失败: {}", json, e);
             return "";
         }
     }

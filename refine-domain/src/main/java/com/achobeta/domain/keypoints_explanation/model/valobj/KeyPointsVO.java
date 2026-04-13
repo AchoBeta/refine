@@ -11,7 +11,7 @@ public class KeyPointsVO {
     /**
      * 知识点id
      */
-    private int id;
+    private String id;
     /**
      * 知识点内容
      */

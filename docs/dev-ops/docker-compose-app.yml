@@ -6,6 +6,7 @@ services:
   refine:
     image: docker.cnb.cool/hamster-yhz/refine:latest
     container_name: refine
+    pull_policy: always
     restart: on-failure
     ports:
       - "8091:8091"

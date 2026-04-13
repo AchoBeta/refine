@@ -29,10 +29,9 @@ public class LearningAnalysisService {
      * 用户登录时触发的学习动态分析
      *
      * @param userId 用户ID
-     * @return 学习动态列表
      */
     @Async
-    public List<LearningDynamicVO> onUserLogin(String userId) {
+    public void onUserLogin(String userId) {
         try {
             log.info("用户登录触发学习动态分析，userId:{}", userId);
 
@@ -40,11 +39,9 @@ public class LearningAnalysisService {
             List<LearningDynamicVO> dynamics = learningDynamicsService.analyzeUserLearningDynamics(userId);
 
             log.info("用户登录学习动态分析完成，userId:{} 动态数量:{}", userId, dynamics.size());
-            return dynamics;
 
         } catch (Exception e) {
             log.error("用户登录学习动态分析失败，userId:{}", userId, e);
-            return Collections.emptyList();
         }
     }
 
